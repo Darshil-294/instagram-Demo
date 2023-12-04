@@ -1,0 +1,17 @@
+export const Images = {
+  google_logo: require('../assets/img/google_logo.png'),
+  facebook_logo: require('../assets/img/facebook_logo.png'),
+  twitter_logo: require('../assets/img/twitter_logo.png'),
+  user: require('../assets/img/user.png'),
+  close: require('../assets/img/close.png'),
+  home: require('../assets/img/home.png'),
+  homefill: require('../assets/img/homefill.png'),
+  like: require('../assets/img/like.png'),
+  likefill: require('../assets/img/likefill.png'),
+  feed: require('../assets/img/feed.png'),
+  feedfill: require('../assets/img/feedfill.png'),
+  menu: require('../assets/img/menu.png'),
+  save: require('../assets/img/save.png'),
+  savefill: require('../assets/img/savefill.png'),
+  gallery: require('../assets/img/gallery.png'),
+};
