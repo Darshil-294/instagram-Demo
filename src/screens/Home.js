@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
@@ -109,7 +110,22 @@ const Home = () => {
                 )}
               />
               <View style={styles?.footer_container}>
-                <Image source={Images?.like} style={styles?.like} />
+                <View style={styles?.like_container}>
+                  <TouchableOpacity>
+                    <Image source={Images?.like} style={styles?.like} />
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                    <Image source={Images?.comment} style={styles?.like} />
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                    <Image source={Images?.save} style={styles?.like} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles?.discription_container}>
+                <Text style={styles?.username}>
+                  {user?.firstname} {user?.lastname}
+                </Text>
               </View>
             </View>
           );
@@ -173,6 +189,8 @@ const styles = StyleSheet.create({
   footer_container: {
     paddingVertical: hp(12),
     paddingHorizontal: wp(15),
+    // backgroundColor: 'yellow',
+    flexDirection: 'row',
   },
   like: {
     width: wp(25),
@@ -181,5 +199,16 @@ const styles = StyleSheet.create({
   header_contain: {
     flexDirection: 'row',
     gap: 10,
+  },
+  like_container: {
+    flexDirection: 'row',
+    gap: 20,
+    alignItems: 'center',
+  },
+  discription_container: {
+    paddingHorizontal: wp(10),
+  },
+  username: {
+    color: colors?.black,
   },
 });

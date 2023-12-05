@@ -25,6 +25,9 @@ import {StackActions} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {Current_User_Action} from '../redux/Actions/Actions';
 import firestore from '@react-native-firebase/firestore';
+import {Settings} from 'react-native-fbsdk-next';
+import {LoginButton, AccessToken} from 'react-native-fbsdk-next';
+Settings.setAppID('1021940875756227');
 
 const Login = ({navigation}) => {
   const [email, setemail] = useState('');
@@ -143,7 +146,21 @@ const Login = ({navigation}) => {
             <Image style={styles.social_logo} source={Images.google_logo} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Image style={styles.social_logo} source={Images.facebook_logo} />
+            {/* <Image style={styles.social_logo} source={Images.facebook_logo} /> */}
+            <LoginButton
+              onLoginFinished={(error, result) => {
+                if (error) {
+                  console.log('login has error: ' + result.error);
+                } else if (result.isCancelled) {
+                  console.log('login is cancelled.');
+                } else {
+                  AccessToken.getCurrentAccessToken().then(data => {
+                    console.log(data.accessToken.toString());
+                  });
+                }
+              }}
+              onLogoutFinished={() => console.log('logout.')}
+            />
           </TouchableOpacity>
           <TouchableOpacity>
             <Image style={styles.social_logo} source={Images.twitter_logo} />
