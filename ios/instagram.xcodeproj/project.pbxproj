@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* instagramTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* instagramTests.m */; };
 		016E4F718C44DA726CB49173 /* Pods_instagram.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7678CBE4372808684DC8006F /* Pods_instagram.framework */; };
-		042B6B8A2B19AD3C0063D0E0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 042B6B892B19AD3C0063D0E0 /* GoogleService-Info.plist */; };
-		042B6B8B2B19AD3C0063D0E0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 042B6B892B19AD3C0063D0E0 /* GoogleService-Info.plist */; };
+		043070532B1EE0D600D8B6A4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 043070522B1EE0D600D8B6A4 /* GoogleService-Info.plist */; };
+		043070542B1EE0D600D8B6A4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 043070522B1EE0D600D8B6A4 /* GoogleService-Info.plist */; };
 		096457F29B8C47159F4FAC4B /* Outfit-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD11F16EF9854D5D92BBA0D9 /* Outfit-VariableFont_wght.ttf */; };
 		1089220BB74042958A5F7A2F /* Outfit-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14E91C21F8BB451391CDDFDC /* Outfit-Regular.ttf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
@@ -42,7 +42,7 @@
 		00E356EE1AD99517003FC87E /* instagramTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = instagramTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* instagramTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = instagramTests.m; sourceTree = "<group>"; };
-		042B6B892B19AD3C0063D0E0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		043070522B1EE0D600D8B6A4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0999A5B9CF8A42C348910479 /* Pods-instagram-instagramTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-instagram-instagramTests.debug.xcconfig"; path = "Target Support Files/Pods-instagram-instagramTests/Pods-instagram-instagramTests.debug.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* instagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = instagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = instagram/AppDelegate.h; sourceTree = "<group>"; };
@@ -109,6 +109,7 @@
 		13B07FAE1A68108700A75B9A /* instagram */ = {
 			isa = PBXGroup;
 			children = (
+				043070522B1EE0D600D8B6A4 /* GoogleService-Info.plist */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -139,7 +140,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				042B6B892B19AD3C0063D0E0 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* instagram */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* instagramTests */,
@@ -277,7 +277,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				042B6B8B2B19AD3C0063D0E0 /* GoogleService-Info.plist in Resources */,
+				043070542B1EE0D600D8B6A4 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,7 +285,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				042B6B8A2B19AD3C0063D0E0 /* GoogleService-Info.plist in Resources */,
+				043070532B1EE0D600D8B6A4 /* GoogleService-Info.plist in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				D5B1989591FB4F4E9FEC1D1A /* Outfit-Black.ttf in Resources */,
@@ -813,7 +813,7 @@
 				ENABLE_TESTABILITY = YES;
 				EXCLUDED_ARCHS = "";
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -837,8 +837,6 @@
 					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
-					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
-					"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -901,7 +899,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				EXCLUDED_ARCHS = "";
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -921,8 +919,6 @@
 					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
-					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
-					"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (

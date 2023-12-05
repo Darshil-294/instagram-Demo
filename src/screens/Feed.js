@@ -21,12 +21,17 @@ import auth from '@react-native-firebase/auth';
 import Modals from '../components/common/Modals';
 import storage from '@react-native-firebase/storage';
 import {template} from '@babel/core';
+import {useSelector} from 'react-redux';
 
 const Feed = ({navigation}) => {
   const [images, setimages] = useState([]);
   const [title, settitle] = useState('');
   const [description, setdescription] = useState('');
   const [visible, setvisible] = useState(false);
+
+  const profile_picture = useSelector(
+    state => state?.user?.currentuser?.profile_picture,
+  );
 
   const image = async () => {
     await ImagePicker.openPicker({
@@ -90,6 +95,7 @@ const Feed = ({navigation}) => {
               timeStyle: 'short',
             }),
             user_likes: [],
+            profile_picture: profile_picture,
           }),
         },
         {merge: true},
