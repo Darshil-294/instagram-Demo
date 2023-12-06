@@ -26,8 +26,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Current_User_Action} from '../redux/Actions/Actions';
 import firestore from '@react-native-firebase/firestore';
 import {Settings} from 'react-native-fbsdk-next';
-import {LoginButton, AccessToken} from 'react-native-fbsdk-next';
-Settings.setAppID('1021940875756227');
+import {LoginManager} from 'react-native-fbsdk-next';
 
 const Login = ({navigation}) => {
   const [email, setemail] = useState('');
@@ -43,6 +42,7 @@ const Login = ({navigation}) => {
       iosClientId:
         '790636944576-i3pt0kvlbran8blgqr13t2g9b9dima7h.apps.googleusercontent.com',
     });
+    Settings.setAppID('1021940875756227');
   }, []);
 
   const signinWithGoogle = async () => {
@@ -58,6 +58,24 @@ const Login = ({navigation}) => {
       console.log('ERROR', error);
       // Alert.alert(error);
     }
+  };
+
+  const facebook_login = () => {
+    LoginManager.logInWithPermissions(['public_profile']).then(
+      function (result) {
+        if (result.isCancelled) {
+          console.log('Login cancelled');
+        } else {
+          console.log(
+            'Login success with permissions: ' +
+              result.grantedPermissions.toString(),
+          );
+        }
+      },
+      function (error) {
+        console.log('Login fail with error: ' + error);
+      },
+    );
   };
 
   const signInWithEmail = async () => {
@@ -145,22 +163,8 @@ const Login = ({navigation}) => {
           <TouchableOpacity onPress={signinWithGoogle}>
             <Image style={styles.social_logo} source={Images.google_logo} />
           </TouchableOpacity>
-          <TouchableOpacity>
-            {/* <Image style={styles.social_logo} source={Images.facebook_logo} /> */}
-            <LoginButton
-              onLoginFinished={(error, result) => {
-                if (error) {
-                  console.log('login has error: ' + result.error);
-                } else if (result.isCancelled) {
-                  console.log('login is cancelled.');
-                } else {
-                  AccessToken.getCurrentAccessToken().then(data => {
-                    console.log(data.accessToken.toString());
-                  });
-                }
-              }}
-              onLogoutFinished={() => console.log('logout.')}
-            />
+          <TouchableOpacity onPress={facebook_login}>
+            <Image style={styles.social_logo} source={Images.facebook_logo} />
           </TouchableOpacity>
           <TouchableOpacity>
             <Image style={styles.social_logo} source={Images.twitter_logo} />
@@ -210,7 +214,6 @@ const Login = ({navigation}) => {
                 />
               </>
             ) : null
-            // null
           }
         />
       )}

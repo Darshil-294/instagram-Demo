@@ -13,7 +13,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import firestore, {firebase} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Modals from '../components/common/Modals';
-import {hp, wp} from '../helper/global';
+import {fs, hp, wp} from '../helper/global';
 import {useSelector} from 'react-redux';
 import {colors} from '../helper/colors';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
@@ -24,30 +24,33 @@ const Home = () => {
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
+
+  // const userId = auth()?.currentUser?.uid;
   useEffect(() => {
     get_Data();
+
+    return () => get_Data();
   }, []);
 
   const current_index = useRef(null);
 
   const user = useSelector(state => state?.user?.currentuser);
 
-  // const getCurrentIndex = () => {
-
-  //   setcurrentIndex(currentIndex);
-  // };
-
   const get_Data = async () => {
     setvisible(true);
+    console.log('start');
     setRefreshing(true);
-    await firestore()
-      ?.collection('post')
-      ?.doc(auth()?.currentUser?.uid)
-      ?.get()
-      ?.then(async res => {
-        setdata(res?.data()?.postList);
-      })
-      ?.finally(() => {
+    let data;
+    Promise.all(
+      (data = firestore()
+        ?.collection('post')
+        ?.doc(auth()?.currentUser?.uid)
+        ?.onSnapshot(async res => {
+          setdata(await res?.data()?.postList);
+        })),
+    )
+      .then(() => {
+        console.log('end');
         setvisible(false);
         setRefreshing(false);
       })
@@ -55,8 +58,9 @@ const Home = () => {
         setvisible(false);
         console.log('EROOR', error);
       });
+
+    return data;
   };
-  // console.log(data);
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -126,6 +130,7 @@ const Home = () => {
                 <Text style={styles?.username}>
                   {user?.firstname} {user?.lastname}
                 </Text>
+                <Text>{item?.description}</Text>
               </View>
             </View>
           );
@@ -207,8 +212,14 @@ const styles = StyleSheet.create({
   },
   discription_container: {
     paddingHorizontal: wp(10),
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
+    flexWrap: 'wrap',
   },
   username: {
     color: colors?.black,
+    fontFamily: 'Outfit-Medium',
+    fontSize: fs(15),
   },
 });

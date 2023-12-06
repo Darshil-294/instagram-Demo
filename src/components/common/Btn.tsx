@@ -1,6 +1,11 @@
-import {StyleSheet, Text, TextStyle, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {FC} from 'react';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import {fs, hp, wp} from '../../helper/global';
 
 interface btn {

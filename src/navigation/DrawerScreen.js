@@ -9,109 +9,142 @@ import {
 import React, {useState} from 'react';
 import {fs, hp, wp} from '../helper/global';
 import {Images} from '../helper/images';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {colors} from '../helper/colors';
+import Btn from '../components/common/Btn';
+import auth from '@react-native-firebase/auth';
+import {Current_User_Action} from '../redux/Actions/Actions';
 
 const DrawerScreen = ({navigation}) => {
   const [select, setselect] = useState('Home');
   const userdata = useSelector(state => state?.user?.currentuser);
+  const DISPATCH = useDispatch();
   // console.log(props.navigation);
+  const Sign_Out = async () => {
+    await auth()
+      .signOut()
+      .then(async () => {
+        DISPATCH(Current_User_Action(null));
+        navigation?.navigate('Login');
+        console.log('User signed out!');
+      });
+  };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.profile_container}>
-        <Image
-          style={styles.profile_picture}
-          source={{uri: userdata?.profile_picture}}
-        />
-        <Text style={styles.title}>
-          {userdata?.firstname} {userdata?.lastname}
-        </Text>
+      <View style={{flex: 1}}>
+        <View style={styles.profile_container}>
+          <Image
+            style={styles.profile_picture}
+            source={{uri: userdata?.profile_picture}}
+          />
+          <Text style={styles.title}>
+            {userdata?.firstname} {userdata?.lastname}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            setselect('Home');
+            navigation.navigate('Home');
+          }}
+          style={
+            select == 'Home' ? [styles.btn, styles.select_btn] : styles.btn
+          }>
+          <Image
+            style={
+              select == 'Home'
+                ? [styles.icon, styles.icon_select]
+                : [styles.icon]
+            }
+            source={select == 'Home' ? Images?.homefill : Images?.home}
+          />
+          <Text
+            style={
+              select == 'Home'
+                ? [styles.unselect, styles.select]
+                : styles.unselect
+            }>
+            Home
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setselect('Save'), navigation.navigate('Save');
+          }}
+          style={
+            select == 'Save' ? [styles.btn, styles.select_btn] : styles.btn
+          }>
+          <Image
+            style={
+              select == 'Save'
+                ? [styles.icon, styles.icon_select]
+                : [styles.icon]
+            }
+            source={select == 'Save' ? Images?.savefill : Images?.save}
+          />
+          <Text
+            style={
+              select == 'Save'
+                ? [styles.unselect, styles.select]
+                : styles.unselect
+            }>
+            Save
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setselect('Feed'), navigation.navigate('Feed');
+          }}
+          style={
+            select == 'Feed' ? [styles.btn, styles.select_btn] : styles.btn
+          }>
+          <Image
+            style={
+              select == 'Feed'
+                ? [styles.icon, styles.icon_select]
+                : [styles.icon]
+            }
+            source={select == 'Feed' ? Images?.feedfill : Images?.feed}
+          />
+          <Text
+            style={
+              select == 'Feed'
+                ? [styles.unselect, styles.select]
+                : styles.unselect
+            }>
+            Feed
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setselect('Profile');
+            navigation.navigate('Profile');
+          }}
+          style={
+            select == 'Profile' ? [styles.btn, styles.select_btn] : styles.btn
+          }>
+          <Image
+            style={styles.profile}
+            source={{uri: userdata?.profile_picture}}
+          />
+          <Text
+            style={
+              select == 'Profile'
+                ? [styles.unselect, styles.select]
+                : styles.unselect
+            }>
+            Profile
+          </Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        onPress={() => {
-          setselect('Home');
-          navigation.navigate('Home');
-        }}
-        style={select == 'Home' ? [styles.btn, styles.select_btn] : styles.btn}>
-        <Image
-          style={
-            select == 'Home' ? [styles.icon, styles.icon_select] : [styles.icon]
-          }
-          source={select == 'Home' ? Images?.homefill : Images?.home}
-        />
-        <Text
-          style={
-            select == 'Home'
-              ? [styles.unselect, styles.select]
-              : styles.unselect
-          }>
-          Home
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          setselect('Save'), navigation.navigate('Save');
-        }}
-        style={select == 'Save' ? [styles.btn, styles.select_btn] : styles.btn}>
-        <Image
-          style={
-            select == 'Save' ? [styles.icon, styles.icon_select] : [styles.icon]
-          }
-          source={select == 'Save' ? Images?.savefill : Images?.save}
-        />
-        <Text
-          style={
-            select == 'Save'
-              ? [styles.unselect, styles.select]
-              : styles.unselect
-          }>
-          Save
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          setselect('Feed'), navigation.navigate('Feed');
-        }}
-        style={select == 'Feed' ? [styles.btn, styles.select_btn] : styles.btn}>
-        <Image
-          style={
-            select == 'Feed' ? [styles.icon, styles.icon_select] : [styles.icon]
-          }
-          source={select == 'Feed' ? Images?.feedfill : Images?.feed}
-        />
-        <Text
-          style={
-            select == 'Feed'
-              ? [styles.unselect, styles.select]
-              : styles.unselect
-          }>
-          Feed
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          setselect('Profile');
-          navigation.navigate('Profile');
-        }}
-        style={
-          select == 'Profile' ? [styles.btn, styles.select_btn] : styles.btn
-        }>
-        <Image
-          style={styles.profile}
-          source={{uri: userdata?.profile_picture}}
-        />
-        <Text
-          style={
-            select == 'Profile'
-              ? [styles.unselect, styles.select]
-              : styles.unselect
-          }>
-          Profile
-        </Text>
-      </TouchableOpacity>
+      <Btn
+        title="Sign Out"
+        onpress={Sign_Out}
+        title_style={styles?.signout_title}
+        style={styles?.signout_btn}
+      />
     </SafeAreaView>
   );
 };
@@ -120,6 +153,7 @@ export default DrawerScreen;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginHorizontal: wp(20),
   },
   select_btn: {
@@ -169,5 +203,11 @@ const styles = StyleSheet.create({
     fontSize: fs(20),
     fontFamily: 'Outfit-Regular',
     marginVertical: hp(10),
+  },
+  signout_title: {
+    fontFamily: 'Outfit-Regular',
+  },
+  signout_btn: {
+    marginBottom: hp(20),
   },
 });

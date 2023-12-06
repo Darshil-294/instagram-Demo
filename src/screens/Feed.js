@@ -86,7 +86,8 @@ const Feed = ({navigation}) => {
       ?.set(
         {
           postList: firebase.firestore.FieldValue.arrayUnion({
-            // uid: auth()?.currentUser?.uid,
+            uid: auth()?.currentUser?.uid,
+            id: Date.now(),
             images: temp,
             title: title,
             description: description,
@@ -95,6 +96,7 @@ const Feed = ({navigation}) => {
               timeStyle: 'short',
             }),
             user_likes: [],
+            save: [],
             profile_picture: profile_picture,
           }),
         },
