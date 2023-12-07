@@ -18,19 +18,23 @@ import {useSelector} from 'react-redux';
 import {colors} from '../helper/colors';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import {Images} from '../helper/images';
+import {strings} from '../helper/string';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const Home = () => {
   const [data, setdata] = useState([]);
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
+  const [users, setusers] = useState('');
+  const [like, setlike] = useState('');
 
   // const userId = auth()?.currentUser?.uid;
   useEffect(() => {
     get_Data();
-
-    return () => get_Data();
   }, []);
+
+  // console.log(data[0]?.user_likes[0]);
 
   const current_index = useRef(null);
 
@@ -38,29 +42,86 @@ const Home = () => {
 
   const get_Data = async () => {
     setvisible(true);
-    console.log('start');
     setRefreshing(true);
-    let data;
-    Promise.all(
-      (data = firestore()
+    let temp = [];
+    await Promise.all(
+      firestore()
         ?.collection('post')
-        ?.doc(auth()?.currentUser?.uid)
-        ?.onSnapshot(async res => {
-          setdata(await res?.data()?.postList);
-        })),
+        ?.onSnapshot(async querySnapshot => {
+          await Promise.all(
+            querySnapshot?.forEach(documentSnapshot => {
+              if (documentSnapshot?.id == auth()?.currentUser?.uid) {
+                setdata(documentSnapshot?.data()?.postList);
+                temp = [...documentSnapshot?.data()?.postList];
+              }
+            }),
+            temp?.map(itemss => {
+              if (itemss?.user_likes[0] != undefined) {
+                firestore()
+                  ?.collection('users')
+                  ?.onSnapshot(item => {
+                    item?.docs?.map(items => {
+                      if (items?.data()?.uid == itemss?.user_likes[0]) {
+                        setusers(items?.data()?.full_name);
+                        console.log('users', users);
+                      }
+                    });
+                  });
+              } else {
+                console.log('NO users');
+              }
+            }),
+          );
+        }),
     )
-      .then(() => {
-        console.log('end');
+      .catch(err => {
+        setvisible(false);
+        console.log('err', err);
+      })
+      .finally(() => {
         setvisible(false);
         setRefreshing(false);
-      })
-      .catch(error => {
-        setvisible(false);
-        console.log('EROOR', error);
       });
-
-    return data;
   };
+
+  // const get_Data = async () => {
+  //   setvisible(true);
+  //   setRefreshing(true);
+  //   try {
+  //     const querySnapshot = await firestore().collection('post').get();
+  //     const postData = querySnapshot.docs
+  //       .filter(
+  //         documentSnapshot => documentSnapshot.id === auth()?.currentUser?.uid,
+  //       )
+  //       .map(documentSnapshot => documentSnapshot.data().postList);
+  //     setdata(postData);
+
+  //     postData.forEach((itemss, index) => {
+  //       console.log('itemss[]', itemss[0]?.uid);
+  //       if (itemss.user_likes[0] !== undefined) {
+  //         firestore()
+  //           .collection('users')
+  //           .where(itemss[index]?.uid, '==', itemss.user_likes[0])
+  //           .onSnapshot(item => {
+  //             console.log('snap item', item);
+  //             item.docs.forEach(items => {
+  //               setusers(items.data().full_name);
+  //               console.log('users', items.data().full_name);
+  //             });
+  //           });
+  //       } else {
+  //         console.log('noooo');
+  //       }
+  //     });
+
+  //     setvisible(false);
+  //     setRefreshing(false);
+  //   } catch (err) {
+  //     setvisible(false);
+  //     console.log('err', err);
+  //   }
+  // };
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -87,7 +148,7 @@ const Home = () => {
                 </View>
                 <View style={styles?.counter}>
                   <Text style={styles?.counter_lable}>
-                    {item?.images.length > 1 ? (
+                    {item?.images?.length > 1 ? (
                       <Text>
                         {currentIndex}/{item?.images.length}
                       </Text>
@@ -116,7 +177,14 @@ const Home = () => {
               <View style={styles?.footer_container}>
                 <View style={styles?.like_container}>
                   <TouchableOpacity>
-                    <Image source={Images?.like} style={styles?.like} />
+                    <Image
+                      source={
+                        item?.user_likes?.some(val => val == item?.uid)
+                          ? Images?.likefill
+                          : Images?.like
+                      }
+                      style={styles?.like}
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity>
                     <Image source={Images?.comment} style={styles?.like} />
@@ -132,10 +200,24 @@ const Home = () => {
                 </Text>
                 <Text>{item?.description}</Text>
               </View>
+              <View style={styles?.like_section}>
+                {item?.user_likes?.length == 0 ? null : (
+                  <View style={styles?.like_header}>
+                    <Text style={styles?.like_title}>{strings?.like} by</Text>
+                    <Text style={{color: Colors?.black}}>
+                      {users}
+                      {item?.user_likes?.length == 1 ? null : (
+                        <Text> {item?.user_likes?.length - 1} Other</Text>
+                      )}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
           );
         }}
       />
+
       <Modals visible={visible} />
     </SafeAreaView>
   );
@@ -213,7 +295,7 @@ const styles = StyleSheet.create({
   discription_container: {
     paddingHorizontal: wp(10),
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'flex-end',
     gap: 10,
     flexWrap: 'wrap',
   },
@@ -221,5 +303,19 @@ const styles = StyleSheet.create({
     color: colors?.black,
     fontFamily: 'Outfit-Medium',
     fontSize: fs(15),
+  },
+  like_section: {
+    paddingHorizontal: wp(10),
+  },
+  like_title: {
+    color: colors?.black,
+    fontFamily: 'Outfit-Medium',
+    fontSize: fs(15),
+  },
+  like_header: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 5,
+    flexWrap: 'wrap',
   },
 });

@@ -18,4 +18,5 @@ export const strings = {
   title: 'Title',
   description: 'Description',
   post: 'Post',
+  like: 'Like',
 };

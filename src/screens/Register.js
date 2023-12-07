@@ -61,6 +61,7 @@ const Register = ({navigation}) => {
           email: email.toLocaleLowerCase(),
           password: password,
           profile_picture: url,
+          full_name: firstname + ' ' + lastname,
         };
         await firestore()
           ?.collection('users')
