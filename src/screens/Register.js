@@ -62,6 +62,7 @@ const Register = ({navigation}) => {
           password: password,
           profile_picture: url,
           full_name: firstname + ' ' + lastname,
+          savedPost: [],
         };
         await firestore()
           ?.collection('users')

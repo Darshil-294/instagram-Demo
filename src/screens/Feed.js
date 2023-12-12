@@ -29,10 +29,9 @@ const Feed = ({navigation}) => {
   const [description, setdescription] = useState('');
   const [visible, setvisible] = useState(false);
 
-  const profile_picture = useSelector(
-    state => state?.user?.currentuser?.profile_picture,
-  );
-
+  const currunt_user = useSelector(state => state?.user?.currentuser);
+  const profile_picture = currunt_user?.profile_picture;
+  const full_name = currunt_user?.full_name;
   const image = async () => {
     await ImagePicker.openPicker({
       width: 300,
@@ -79,6 +78,7 @@ const Feed = ({navigation}) => {
         });
       }),
     );
+
     setvisible(false);
     await firestore()
       ?.collection('post')
@@ -96,8 +96,8 @@ const Feed = ({navigation}) => {
               timeStyle: 'short',
             }),
             user_likes: [],
-            save: [],
             profile_picture: profile_picture,
+            fullName: full_name,
           }),
         },
         {merge: true},
