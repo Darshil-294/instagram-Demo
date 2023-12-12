@@ -2,6 +2,7 @@ import {
   Dimensions,
   FlatList,
   Image,
+  LogBox,
   RefreshControl,
   SafeAreaView,
   StyleSheet,
@@ -23,38 +24,198 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const Save = () => {
   const [data, setdata] = useState([]);
+  const [userdata, setUserdata] = useState({});
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
-  const [users, setusers] = useState('');
+  const [users, setusers] = useState([]);
 
   useEffect(() => {
-    get_Data();
-  }, [like_handler]);
+    get_User_Data();
+    // get_Data();
+  }, []);
 
   const current_index = useRef(null);
 
   const user = useSelector(state => state?.user?.currentuser);
 
+  //   let temp = [];
+  //   try {
+  //     setvisible(true);
+  //     setRefreshing(true);
+  //     firestore()
+  //       ?.collection('users')
+  //       ?.onSnapshot(querySnapshot => {
+  //         let t = [];
+  //         querySnapshot?.docs?.map(s => {
+  //           if (!s?.data?.()?.savedPost?.length === 0) {
+  //             setdata([]);
+  //           } else {
+  //             s?.data?.()?.savedPost?.map(async p => {
+  //               firestore()
+  //                 .collection('post')
+  //                 .onSnapshot(snap => {
+  //                   console.log('snap', snap);
+  //                   t = [];
+  //                   console.log('t', t);
+  //                   snap?.docs?.map(s => {
+  //                     s?.data().postList?.map(po => {
+  //                       if (po?.id === p) {
+  //                         t.push(po);
+  //                       }
+  //                     });
+  //                   });
+  //                   setdata(t);
+  //                 });
+  //             });
+  //           }
+  //         });
+  //         setdata(t);
+  //         setvisible(false);
+  //         setRefreshing(false);
+  //       });
+  //   } catch (error) {
+  //     setvisible(false);
+  //     setRefreshing(false);
+  //     console.log('error', error);
+  //   }
+  // };
+
+  // const get_DataTemp = async () => {
+  //   let temp = [];
+  //   let t = [];
+  //   try {
+  //     setvisible(true);
+  //     setRefreshing(true);
+  //     firestore()
+  //       ?.collection('post')
+  //       ?.onSnapshot(querySnapshot => {
+  //         setdata(() => []);
+  //         querySnapshot?.docs?.map(s => {
+  //           s?.data()?.postList?.map(async p => {
+  //             firestore()
+  //               .collection('users')
+  //               .onSnapshot(d => {
+  //                 d.docs.map(u => {
+  //                   if (u?.data()?.savedPost?.length === 0) {
+  //                     t = [];
+  //                   } else {
+  //                     u?.data?.()?.savedPost?.map(po => {
+  //                       // console.log('Po', po);
+  //                       if (po === p?.id) {
+  //                         // console.log('If called', p);
+  //                         // console.log('Call');
+  //                         t.push(p);
+  //                       }
+  //                     });
+  //                   }
+  //                 });
+  //                 // console.log('t', t);
+  //                 setdata(prev => [...data, ...t]);
+  //               });
+  //           });
+
+  //           //  if (!s?.data?.()?.postList?.length === 0) {
+  //           //    setdata([]);
+  //           //  } else {
+  //           //    s?.data?.()?.savedPost?.map(async p => {
+  //           //      firestore()
+  //           //        .collection('post')
+  //           //        .onSnapshot(snap => {
+  //           //          console.log('snap', snap);
+  //           //          t = [];
+  //           //          console.log('t', t);
+  //           //          snap?.docs?.map(s => {
+  //           //            s?.data().postList?.map(po => {
+  //           //              if (po?.id === p) {
+  //           //                t.push(po);
+  //           //              }
+  //           //            });
+  //           //          });
+  //           //          setdata(t);
+  //           //        });
+  //           //    });
+  //           //  }
+  //         });
+  //         // setdata(t);
+  //         setvisible(false);
+  //         setRefreshing(false);
+  //       });
+  //   } catch (error) {
+  //     setvisible(false);
+  //     setRefreshing(false);
+  //     console.log('error', error);
+  //   }
+  // };
+  // const get_Data = async () => {
+
+  // };
+
+  const get_User_Data = async () => {
+    try {
+      setvisible(true);
+      setRefreshing(true);
+      firestore()
+        ?.collection('users')
+        ?.onSnapshot(async querySnapshot => {
+          querySnapshot?.docs.length == 0
+            ? (setvisible(false), setRefreshing(false))
+            : querySnapshot?.forEach(documentSnapshot => {
+                if (documentSnapshot?.id == auth()?.currentUser?.uid) {
+                  firestore()
+                    .collection('post')
+                    .onSnapshot(onSnapshotData => {
+                      let array = [];
+                      onSnapshotData.docs.forEach(i => {
+                        array.push(i.data().postList);
+                      });
+                      // console.log(userdata);
+                      setdata(
+                        array
+                          .flat()
+                          .filter(e =>
+                            documentSnapshot
+                              ?.data()
+                              ?.savedPost?.some(w => w === e.id),
+                          ),
+                      );
+                    });
+                  setUserdata(documentSnapshot?.data());
+                  setvisible(false);
+                  setRefreshing(false);
+                }
+              });
+        });
+    } catch (error) {
+      setvisible(false);
+      setRefreshing(false);
+      console.log('Error', error);
+    }
+  };
+
   const like_handler = async value => {
-    await firestore()
-      ?.collection('post')
-      .doc(value?.uid)
-      .get()
-      .then(async d => {
-        await firestore()
-          ?.collection('post')
-          .doc(value?.uid)
-          .update({
-            postList: d.data().postList.map(i => {
-              if (i.id == value.id) {
-                i.user_likes = [...i.user_likes, auth().currentUser.uid];
+    try {
+      await firestore()
+        ?.collection('post')
+        .doc(value?.uid)
+        .get()
+        .then(async d => {
+          await firestore()
+            ?.collection('post')
+            .doc(value?.uid)
+            .update({
+              postList: d.data().postList.map(i => {
+                if (i.id === value.id) {
+                  i.user_likes = [...i.user_likes, auth().currentUser.uid];
+                  return i;
+                }
                 return i;
-              }
-              return i;
-            }),
-          });
-      });
+              }),
+            });
+        });
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   const un_like_handler = async value => {
@@ -80,58 +241,21 @@ const Save = () => {
       });
   };
 
-  // const save_post_handler = async value => {
-  //   await firestore()
-  //     ?.collection('save')
-  //     ?.doc(auth()?.currentUser?.uid)
-  //     ?.set({
-  //       saveList: firebase.firestore.FieldValue.arrayUnion({
-  //         id: value?.id,
-  //         uid: value?.uid,
-  //       }),
-  //     });
-  // };
-
   const save_post_handler = async value => {
     await firestore()
-      ?.collection('post')
+      ?.collection('users')
       .doc(value?.uid)
-      .get()
-      .then(async d => {
-        await firestore()
-          ?.collection('post')
-          .doc(value?.uid)
-          .update({
-            postList: d.data().postList.map(i => {
-              if (i.id == value.id) {
-                // console.log(i?.save);
-                i.save = [...i.save, auth().currentUser.uid];
-                return i;
-              }
-              return i;
-            }),
-          });
+      .update({
+        savedPost: firebase.firestore.FieldValue.arrayUnion(value?.id),
       });
   };
 
   const un_save_post_handler = async value => {
     await firestore()
-      ?.collection('post')
+      ?.collection('users')
       .doc(value?.uid)
-      .get()
-      .then(async d => {
-        await firestore()
-          ?.collection('post')
-          .doc(value?.uid)
-          .update({
-            postList: d.data().postList.map(i => {
-              if (i.id == value.id) {
-                i.save = i.save.filter(a => a !== auth().currentUser.uid);
-                return i;
-              }
-              return i;
-            }),
-          });
+      .update({
+        savedPost: firebase.firestore.FieldValue.arrayRemove(value?.id),
       });
   };
 
@@ -139,11 +263,12 @@ const Save = () => {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={data}
+        keyExtractor={item => {}}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={get_Data} />
+          <RefreshControl refreshing={refreshing} onRefresh={get_User_Data} />
         }
-        renderItem={({item, indexs}) => {
+        renderItem={({item, index}) => {
           return (
             <View style={styles?.card_container}>
               <View style={styles?.card_header}>
@@ -209,15 +334,15 @@ const Save = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={async () => {
-                      item?.save?.some(val => val == item?.uid)
+                      userdata.savedPost.some(i => i == item.id)
                         ? un_save_post_handler(item)
                         : save_post_handler(item);
                     }}>
                     <Image
                       source={
-                        item?.save?.some(val => val == item?.uid)
-                          ? Images?.savefill
-                          : Images?.save
+                        userdata.savedPost.some(i => i == item.id)
+                          ? Images.savefill
+                          : Images.save
                       }
                       style={styles?.like}
                     />

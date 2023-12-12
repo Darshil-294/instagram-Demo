@@ -44,6 +44,7 @@ const Home = () => {
       firestore()
         ?.collection('post')
         ?.onSnapshot(querySnapshot => {
+          console.log('Called');
           querySnapshot?.docs.length == 0
             ? (setvisible(false), setRefreshing(false))
             : querySnapshot?.forEach(documentSnapshot => {
@@ -94,6 +95,31 @@ const Home = () => {
       console.log('Error', error);
     }
   };
+
+  // const like_handler = async value => {
+  //   try {
+  //     await firestore()
+  //       ?.collection('post')
+  //       .doc(value?.uid)
+  //       .get()
+  //       .then(async d => {
+  //         await firestore()
+  //           ?.collection('post')
+  //           .doc(value?.uid)
+  //           .update({
+  //             postList: d.data().postList.map(i => {
+  //               if (i.id == value.id) {
+  //                 i.user_likes = [...i.user_likes, auth().currentUser.uid];
+  //                 return i;
+  //               }
+  //               return i;
+  //             }),
+  //           });
+  //       });
+  //   } catch (error) {
+  //     console.log('error', error);
+  //   }
+  // };
 
   const like_handler = async value => {
     try {
@@ -281,7 +307,7 @@ const Home = () => {
 
 export default Home;
 
-const {width, height, scale} = Dimensions.get('screen');
+const {width} = Dimensions.get('screen');
 
 const styles = StyleSheet.create({
   container: {
