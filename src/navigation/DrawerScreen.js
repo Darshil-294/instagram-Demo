@@ -14,6 +14,7 @@ import {colors} from '../helper/colors';
 import Btn from '../components/common/Btn';
 import auth from '@react-native-firebase/auth';
 import {Current_User_Action} from '../redux/Actions/Actions';
+import {StackActions} from '@react-navigation/native';
 
 const DrawerScreen = ({navigation}) => {
   const [select, setselect] = useState('Home');
@@ -26,6 +27,7 @@ const DrawerScreen = ({navigation}) => {
       .then(async () => {
         DISPATCH(Current_User_Action(null));
         navigation?.navigate('Login');
+        // navigation.sat
         console.log('User signed out!');
       });
   };
@@ -203,6 +205,7 @@ const styles = StyleSheet.create({
     fontSize: fs(20),
     fontFamily: 'Outfit-Regular',
     marginVertical: hp(10),
+    color: colors?.black,
   },
   signout_title: {
     fontFamily: 'Outfit-Regular',

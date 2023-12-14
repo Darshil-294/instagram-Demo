@@ -31,11 +31,12 @@ const styles = StyleSheet.create({
   btn: {
     backgroundColor: 'black',
     // width: wp(200),
-    height: hp(50),
+    // height: hp(50),
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: wp(20),
+    paddingVertical: wp(10),
   },
   title: {
     color: 'white',

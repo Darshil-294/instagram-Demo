@@ -15,4 +15,5 @@ export const Images = {
   savefill: require('../assets/img/savefill.png'),
   gallery: require('../assets/img/gallery.png'),
   comment: require('../assets/img/comment.png'),
+  dots: require('../assets/img/dots.png'),
 };

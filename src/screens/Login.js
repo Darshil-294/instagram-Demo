@@ -95,6 +95,8 @@ const Login = ({navigation}) => {
           : null;
       })
       ?.then(() => {
+        setemail('');
+        setpassword('');
         seterror(false);
         navigation.navigate('Drawer');
       })

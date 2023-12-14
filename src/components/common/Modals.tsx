@@ -19,6 +19,7 @@ interface modals {
   contain?: any;
   close?: any;
   containStyle?: TextStyle;
+  containerStyle?: TextStyle;
 }
 
 const Indicator = (
@@ -41,13 +42,14 @@ const Modals = ({
   contain,
   close,
   containStyle,
+  containerStyle,
 }: modals) => {
   return (
     <Modal
       visible={visible}
       transparent={transparent}
       animationType={animation}>
-      <View style={styles.modal}>
+      <View style={[styles.modal, containerStyle]}>
         {!contain ? (
           <View style={styles.indicator}>
             <ActivityIndicator size={'large'} color={'black'} />

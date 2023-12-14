@@ -31,7 +31,6 @@ const Home = () => {
 
   useEffect(() => {
     get_User_Data();
-    get_Data();
   }, []);
 
   const current_index = useRef(null);
@@ -44,7 +43,6 @@ const Home = () => {
       firestore()
         ?.collection('post')
         ?.onSnapshot(querySnapshot => {
-          console.log('Called');
           querySnapshot?.docs.length == 0
             ? (setvisible(false), setRefreshing(false))
             : querySnapshot?.forEach(documentSnapshot => {
@@ -63,6 +61,8 @@ const Home = () => {
                   setdata(documentSnapshot?.data()?.postList);
                   setvisible(false);
                   setRefreshing(false);
+                } else {
+                  setvisible(false), setRefreshing(false);
                 }
               });
         });
@@ -76,50 +76,29 @@ const Home = () => {
     try {
       setvisible(true);
       setRefreshing(true);
-      firestore()
-        ?.collection('users')
-        ?.onSnapshot(async querySnapshot => {
-          querySnapshot?.docs.length == 0
-            ? (setvisible(false), setRefreshing(false))
-            : querySnapshot?.forEach(documentSnapshot => {
-                if (documentSnapshot?.id == auth()?.currentUser?.uid) {
-                  setUserdata(documentSnapshot?.data());
-                  setvisible(false);
-                  setRefreshing(false);
-                }
-              });
-        });
+      await Promise.all(
+        firestore()
+          ?.collection('users')
+          ?.onSnapshot(async querySnapshot => {
+            querySnapshot?.docs.length == 0
+              ? (setvisible(false), setRefreshing(false))
+              : querySnapshot?.forEach(documentSnapshot => {
+                  if (documentSnapshot?.id == auth()?.currentUser?.uid) {
+                    setUserdata(documentSnapshot?.data());
+                    setvisible(false);
+                    setRefreshing(false);
+                  }
+                });
+          }),
+      ).then(() => {
+        get_Data();
+      });
     } catch (error) {
       setvisible(false);
       setRefreshing(false);
       console.log('Error', error);
     }
   };
-
-  // const like_handler = async value => {
-  //   try {
-  //     await firestore()
-  //       ?.collection('post')
-  //       .doc(value?.uid)
-  //       .get()
-  //       .then(async d => {
-  //         await firestore()
-  //           ?.collection('post')
-  //           .doc(value?.uid)
-  //           .update({
-  //             postList: d.data().postList.map(i => {
-  //               if (i.id == value.id) {
-  //                 i.user_likes = [...i.user_likes, auth().currentUser.uid];
-  //                 return i;
-  //               }
-  //               return i;
-  //             }),
-  //           });
-  //       });
-  //   } catch (error) {
-  //     console.log('error', error);
-  //   }
-  // };
 
   const like_handler = async value => {
     try {
@@ -206,7 +185,7 @@ const Home = () => {
                   />
                   <View>
                     <Text style={styles?.account_name}>
-                      {user?.firstname} {user?.lastname}
+                      {userdata?.full_name}
                     </Text>
                     <Text style={styles?.title}>{item?.title}</Text>
                   </View>
@@ -261,13 +240,13 @@ const Home = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={async () => {
-                      userdata.savedPost.some(i => i == item.id)
+                      userdata?.savedPost?.some(i => i == item.id)
                         ? un_save_post_handler(item)
                         : save_post_handler(item);
                     }}>
                     <Image
                       source={
-                        userdata.savedPost.some(i => i == item.id)
+                        userdata?.savedPost?.some(i => i == item.id)
                           ? Images.savefill
                           : Images.save
                       }
@@ -277,9 +256,7 @@ const Home = () => {
                 </View>
               </View>
               <View style={styles?.discription_container}>
-                <Text style={styles?.username}>
-                  {user?.firstname} {user?.lastname}
-                </Text>
+                <Text style={styles?.username}>{userdata?.full_name}</Text>
                 <Text style={styles?.description}>{item?.description}</Text>
               </View>
               <View style={styles?.like_section}>
@@ -287,6 +264,7 @@ const Home = () => {
                   <View style={styles?.like_header}>
                     <Text style={styles?.like_title}>{strings?.like} by</Text>
                     <Text style={{color: Colors?.black}}>
+                      {/* {console.log('u', users)} */}
                       {users}
                       {item?.user_likes?.length == 1 ? null : (
                         <Text> {item?.user_likes?.length - 1} Other</Text>
@@ -359,18 +337,18 @@ const styles = StyleSheet.create({
   },
   header_contain: {
     flexDirection: 'row',
-    gap: 10,
+    gap: wp(10),
   },
   like_container: {
     flexDirection: 'row',
-    gap: 20,
+    gap: wp(15),
     alignItems: 'center',
   },
   discription_container: {
     paddingHorizontal: wp(10),
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 10,
+    gap: wp(10),
     flexWrap: 'wrap',
   },
   username: {

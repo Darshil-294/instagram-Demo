@@ -15,7 +15,11 @@ const StackNavigation = props => {
       <stack.Navigator
         initialRouteName={user ? 'Drawer' : 'Login'}
         screenOptions={{headerShown: false}}>
-        <stack.Screen name="Login" component={Login} />
+        <stack.Screen
+          options={{gestureEnabled: false}}
+          name="Login"
+          component={Login}
+        />
         <stack.Screen name="Register" component={Register} />
         <stack.Screen name="Drawer" component={DrawerNavigation} />
       </stack.Navigator>

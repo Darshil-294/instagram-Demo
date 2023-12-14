@@ -39,118 +39,6 @@ const Save = () => {
 
   const user = useSelector(state => state?.user?.currentuser);
 
-  //   let temp = [];
-  //   try {
-  //     setvisible(true);
-  //     setRefreshing(true);
-  //     firestore()
-  //       ?.collection('users')
-  //       ?.onSnapshot(querySnapshot => {
-  //         let t = [];
-  //         querySnapshot?.docs?.map(s => {
-  //           if (!s?.data?.()?.savedPost?.length === 0) {
-  //             setdata([]);
-  //           } else {
-  //             s?.data?.()?.savedPost?.map(async p => {
-  //               firestore()
-  //                 .collection('post')
-  //                 .onSnapshot(snap => {
-  //                   console.log('snap', snap);
-  //                   t = [];
-  //                   console.log('t', t);
-  //                   snap?.docs?.map(s => {
-  //                     s?.data().postList?.map(po => {
-  //                       if (po?.id === p) {
-  //                         t.push(po);
-  //                       }
-  //                     });
-  //                   });
-  //                   setdata(t);
-  //                 });
-  //             });
-  //           }
-  //         });
-  //         setdata(t);
-  //         setvisible(false);
-  //         setRefreshing(false);
-  //       });
-  //   } catch (error) {
-  //     setvisible(false);
-  //     setRefreshing(false);
-  //     console.log('error', error);
-  //   }
-  // };
-
-  // const get_DataTemp = async () => {
-  //   let temp = [];
-  //   let t = [];
-  //   try {
-  //     setvisible(true);
-  //     setRefreshing(true);
-  //     firestore()
-  //       ?.collection('post')
-  //       ?.onSnapshot(querySnapshot => {
-  //         setdata(() => []);
-  //         querySnapshot?.docs?.map(s => {
-  //           s?.data()?.postList?.map(async p => {
-  //             firestore()
-  //               .collection('users')
-  //               .onSnapshot(d => {
-  //                 d.docs.map(u => {
-  //                   if (u?.data()?.savedPost?.length === 0) {
-  //                     t = [];
-  //                   } else {
-  //                     u?.data?.()?.savedPost?.map(po => {
-  //                       // console.log('Po', po);
-  //                       if (po === p?.id) {
-  //                         // console.log('If called', p);
-  //                         // console.log('Call');
-  //                         t.push(p);
-  //                       }
-  //                     });
-  //                   }
-  //                 });
-  //                 // console.log('t', t);
-  //                 setdata(prev => [...data, ...t]);
-  //               });
-  //           });
-
-  //           //  if (!s?.data?.()?.postList?.length === 0) {
-  //           //    setdata([]);
-  //           //  } else {
-  //           //    s?.data?.()?.savedPost?.map(async p => {
-  //           //      firestore()
-  //           //        .collection('post')
-  //           //        .onSnapshot(snap => {
-  //           //          console.log('snap', snap);
-  //           //          t = [];
-  //           //          console.log('t', t);
-  //           //          snap?.docs?.map(s => {
-  //           //            s?.data().postList?.map(po => {
-  //           //              if (po?.id === p) {
-  //           //                t.push(po);
-  //           //              }
-  //           //            });
-  //           //          });
-  //           //          setdata(t);
-  //           //        });
-  //           //    });
-  //           //  }
-  //         });
-  //         // setdata(t);
-  //         setvisible(false);
-  //         setRefreshing(false);
-  //       });
-  //   } catch (error) {
-  //     setvisible(false);
-  //     setRefreshing(false);
-  //     console.log('error', error);
-  //   }
-  // };
-  // const get_Data = async () => {
-
-  // };
-
   const get_User_Data = async () => {
     try {
       setvisible(true);
@@ -263,7 +151,7 @@ const Save = () => {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={data}
-        keyExtractor={item => {}}
+        keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={get_User_Data} />
