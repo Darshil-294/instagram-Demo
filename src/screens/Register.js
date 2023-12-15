@@ -24,6 +24,7 @@ import storage from '@react-native-firebase/storage';
 import Modals from '../components/common/Modals';
 import {useDispatch} from 'react-redux';
 import {Current_User_Action} from '../redux/Actions/Actions';
+import {ValidationHandler} from '../helper/constants';
 
 const Register = ({navigation}) => {
   const [images, setimages] = useState([]);
@@ -95,65 +96,6 @@ const Register = ({navigation}) => {
     // await setuser();
   };
 
-  const validationHandler = () => {
-    if (firstname == '' || firstname.trim().length == 0) {
-      Alert.alert('Please enter valid firstname');
-      return;
-    }
-
-    if (lastname == '' || lastname.trim().length == 0) {
-      Alert.alert('Please enter valid lastname');
-      return;
-    }
-
-    if (email == '') {
-      Alert.alert('Enter Email');
-      return;
-    }
-
-    if (!emailRegex.test(email)) {
-      Alert.alert('Enter valid Email');
-      return;
-    }
-
-    if (parseInt(phone) == '' || parseInt(phone.length) == 0) {
-      Alert.alert('Enter Valid phone number');
-      return;
-    }
-
-    if (isNaN(phone)) {
-      Alert.alert('Please enter valid phone number');
-      return;
-    }
-
-    if (phone.length < 10) {
-      Alert.alert('Enter minimum 10 number');
-      return;
-    }
-
-    if (phone.length > 10) {
-      Alert.alert('Enter maximum 10 number');
-      return;
-    }
-
-    if (password == '' || password.trim().length == 0) {
-      Alert.alert('Enter password');
-      return;
-    }
-
-    if (
-      password !== passwordConfirmation ||
-      passwordConfirmation.trim().length == 0
-    ) {
-      Alert.alert('Password not matched');
-      return;
-    }
-
-    if (password === passwordConfirmation) {
-      createuser();
-    }
-  };
-
   const image = async () => {
     await ImagePicker.openPicker({
       width: 300,
@@ -174,6 +116,7 @@ const Register = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAwareScrollView
+        bounces={false}
         showsVerticalScrollIndicator={false}
         extraScrollHeight={10}
         enableOnAndroid={true}
@@ -235,7 +178,16 @@ const Register = ({navigation}) => {
         </View>
         <Btn
           title={strings.SignUp}
-          onpress={validationHandler}
+          onpress={() =>
+            ValidationHandler(
+              firstname,
+              lastname,
+              email,
+              password,
+              phone,
+              passwordConfirmation,
+            )
+          }
           style={styles.btn}
           title_style={{fontFamily: 'Outfit-Regular'}}
         />

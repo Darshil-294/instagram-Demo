@@ -28,6 +28,7 @@ import Btn from '../components/common/Btn';
 import {emailRegex} from '../helper/Regex';
 import {useDispatch} from 'react-redux';
 import {Current_User_Action} from '../redux/Actions/Actions';
+import {ValidationHandler} from '../helper/constants';
 
 const Profile = () => {
   const [data, setdata] = useState([]);
@@ -38,11 +39,9 @@ const Profile = () => {
   const [email, setemail] = useState('');
   const [phone, setphone] = useState(Number);
   const [password, setpassword] = useState('');
-  const [passwordConfirmation, setpasswordConf] = useState('');
 
   useEffect(() => {
     user_data();
-    console.log(images);
   }, [visible]);
 
   const DISPATCH = useDispatch();
@@ -70,98 +69,56 @@ const Profile = () => {
   };
 
   const save_data = async () => {
-    let url;
-    let user;
-    let reference;
-    let res;
-    if (images === data?.profile_picture) {
-      url = data?.profile_picture;
+    if (data?.email == email && data?.password == password) {
     } else {
-      const filename = images?.substring(
-        images?.lastIndexOf('/') + 1,
-        images?.length,
-      );
-      await new Promise.all(
-        (reference = firebase.storage()?.ref(filename)),
-        (res = await reference.putFile(images)),
-        (url = await firebase
-          .storage()
-          ?.ref(res.metadata.name)
-          ?.getDownloadURL()),
-      );
     }
-    user = {
-      uid: firebase?.auth().currentUser?.uid,
-      firstname: firstname,
-      lastname: lastname,
-      email: email.toLocaleLowerCase(),
-      password: password,
-      profile_picture: url,
-      full_name: firstname + ' ' + lastname,
-      phone: phone,
-    };
-    await firestore()
-      ?.collection('users')
-      ?.doc(firebase?.auth().currentUser?.uid)
-      ?.update(user)
-      ?.then(() => {
-        console.log('User add successfully!');
-        DISPATCH(Current_User_Action(user));
-        setvisible(false);
-      })
-      ?.catch(errr => {
-        console.log(errr);
-        setvisible(false);
-      });
-  };
+    // let url;
+    // let user;
+    // let reference;
+    // let res;
 
-  const validationHandler = () => {
-    if (firstname == '' || firstname.trim().length == 0) {
-      Alert.alert('Please enter valid firstname');
-      return;
-    }
+    // if (data?.email === email || data?.password === password) {
+    // }
 
-    if (lastname == '' || lastname.trim().length == 0) {
-      Alert.alert('Please enter valid lastname');
-      return;
-    }
-
-    if (email == '') {
-      Alert.alert('Enter Email');
-      return;
-    }
-
-    if (!emailRegex.test(email)) {
-      Alert.alert('Enter valid Email');
-      return;
-    }
-
-    if (parseInt(phone) == '' || parseInt(phone.length) == 0) {
-      Alert.alert('Enter Valid phone number');
-      return;
-    }
-
-    if (isNaN(phone)) {
-      Alert.alert('Please enter valid phone number');
-      return;
-    }
-
-    if (phone.length < 10) {
-      Alert.alert('Enter minimum 10 number');
-      return;
-    }
-
-    if (phone.length > 10) {
-      Alert.alert('Enter maximum 10 number');
-      return;
-    }
-
-    if (password == '' || password.trim().length == 0) {
-      Alert.alert('Enter password');
-      return;
-    } else {
-      save_data();
-    }
+    // if (images === data?.profile_picture) {
+    //   url = data?.profile_picture;
+    // } else {
+    //   const filename = images?.substring(
+    //     images?.lastIndexOf('/') + 1,
+    //     images?.length,
+    //   );
+    //   await new Promise.all(
+    //     (reference = firebase.storage()?.ref(filename)),
+    //     (res = await reference.putFile(images)),
+    //     (url = await firebase
+    //       .storage()
+    //       ?.ref(res.metadata.name)
+    //       ?.getDownloadURL()),
+    //   );
+    // }
+    // user = {
+    //   uid: firebase?.auth().currentUser?.uid,
+    //   firstname: firstname,
+    //   lastname: lastname,
+    //   email: email.toLocaleLowerCase(),
+    //   password: password,
+    //   profile_picture: url,
+    //   full_name: firstname + ' ' + lastname,
+    //   phone: phone,
+    // };
+    // await firestore()
+    //   ?.collection('users')
+    //   ?.doc(firebase?.auth().currentUser?.uid)
+    //   ?.update(user)
+    //   ?.then(() => {
+    //     console.log('User add successfully!');
+    //     DISPATCH(Current_User_Action(user));
+    //     setvisible(false);
+    //   })
+    //   ?.catch(errr => {
+    //     console.log(errr);
+    //     setvisible(false);
+    //   });
   };
 
   const image = async () => {
@@ -245,11 +202,22 @@ const Profile = () => {
               title="Save"
               style={styles?.btn}
               title_style={styles?.btn_title}
-              onpress={validationHandler}
+              onpress={() =>
+                ValidationHandler(
+                  firstname,
+                  lastname,
+                  email,
+                  password,
+                  phone,
+                  null,
+                  save_data(),
+                )
+              }
             />
           </ScrollView>
         }
       />
+      <Modals />
     </SafeAreaView>
   );
 };
