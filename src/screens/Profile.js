@@ -1,6 +1,7 @@
 import {
   Alert,
   Image,
+  Linking,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -25,7 +26,6 @@ import ImagePicker from 'react-native-image-crop-picker';
 import Text_Input from '../components/common/Text_Input';
 import {strings} from '../helper/string';
 import Btn from '../components/common/Btn';
-import {emailRegex} from '../helper/Regex';
 import {useDispatch} from 'react-redux';
 import {Current_User_Action} from '../redux/Actions/Actions';
 import {ValidationHandler} from '../helper/constants';
@@ -33,12 +33,16 @@ import {ValidationHandler} from '../helper/constants';
 const Profile = () => {
   const [data, setdata] = useState([]);
   const [visible, setvisible] = useState(false);
+  const [change_credentials_modal, setchange_credentials_modal] =
+    useState(false);
   const [images, setimages] = useState([]);
   const [firstname, setfirstname] = useState('');
   const [lastname, setlastname] = useState('');
   const [email, setemail] = useState('');
   const [phone, setphone] = useState(Number);
   const [password, setpassword] = useState('');
+  const [credentials_verify, setcredentials_verify] = useState('');
+  const [confirm, setconfirm] = useState(false);
 
   useEffect(() => {
     user_data();
@@ -69,17 +73,12 @@ const Profile = () => {
   };
 
   const save_data = async () => {
-    if (data?.email == email && data?.password == password) {
-    } else {
-    }
     // let url;
     // let user;
     // let reference;
     // let res;
-
     // if (data?.email === email || data?.password === password) {
     // }
-
     // if (images === data?.profile_picture) {
     //   url = data?.profile_picture;
     // } else {
@@ -119,6 +118,44 @@ const Profile = () => {
     //     console.log(errr);
     //     setvisible(false);
     //   });
+  };
+
+  const update_credentials = async () => {
+    const mail_URL = 'https://mail.google.com/mail';
+    if (data?.email == email && data?.password == password) {
+    } else {
+      if (data?.email !== email) {
+        const user = firebase.auth().currentUser;
+        user
+          .updateEmail('user01@gmail.com')
+          .then(async res => {})
+          .catch(error => {
+            console.log('error', error);
+          });
+
+        setcredentials_verify('email');
+        setchange_credentials_modal(true);
+      }
+      if (data?.password !== password) {
+        setcredentials_verify('password');
+        setchange_credentials_modal(true);
+      }
+    }
+  };
+
+  const update_password = async () => {
+    const mail_URL = 'https://mail.google.com/mail/u/0/#inbox';
+    firebase
+      .auth()
+      .sendPasswordResetEmail(email)
+      .then(async res => {
+        await Linking.openURL(mail_URL);
+      })
+      .catch(async error => {
+        let errorCode = error.code;
+        let errorMessage = error.message;
+        console.log('err', errorMessage);
+      });
   };
 
   const image = async () => {
@@ -210,14 +247,35 @@ const Profile = () => {
                   password,
                   phone,
                   null,
-                  save_data(),
+                  update_credentials(),
                 )
               }
             />
           </ScrollView>
         }
       />
-      <Modals />
+      <Modals
+        visible={change_credentials_modal}
+        animation="fade"
+        close={setchange_credentials_modal}
+        contain={
+          <View style={styles?.alert_container}>
+            <Text style={styles?.credentials_alert}>
+              {credentials_verify == 'password'
+                ? `You have submitted a password change request !`
+                : ''}
+            </Text>
+            <View style={styles?.btn_conatiner}>
+              <Btn
+                title="Yes"
+                onpress={() => {
+                  update_password();
+                }}
+              />
+            </View>
+          </View>
+        }
+      />
     </SafeAreaView>
   );
 };
@@ -282,5 +340,20 @@ const styles = StyleSheet.create({
   },
   btn_title: {
     fontFamily: 'Outfit-Medium',
+  },
+  credentials_alert: {
+    color: colors?.black,
+    fontSize: fs(18),
+    textAlign: 'center',
+    fontFamily: 'Outfit-Medium',
+  },
+  alert_container: {
+    width: '80%',
+  },
+  btn_conatiner: {
+    flexDirection: 'row',
+    gap: wp(15),
+    justifyContent: 'center',
+    marginTop: hp(20),
   },
 });

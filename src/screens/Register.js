@@ -17,7 +17,6 @@ import {Platform} from 'react-native';
 import Text_Input from '../components/common/Text_Input';
 import Btn from '../components/common/Btn';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {emailRegex} from '../helper/Regex';
 import {firebase} from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -186,6 +185,7 @@ const Register = ({navigation}) => {
               password,
               phone,
               passwordConfirmation,
+              createuser(),
             )
           }
           style={styles.btn}

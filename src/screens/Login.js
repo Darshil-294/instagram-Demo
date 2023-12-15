@@ -101,6 +101,7 @@ const Login = ({navigation}) => {
         navigation.navigate('Drawer');
       })
       ?.catch(error => {
+        seterror(false);
         if (error?.code == 'auth/invalid-email') {
           seterror('Please enter a valid email address');
         } else if (error?.code == 'auth/wrong-password') {
