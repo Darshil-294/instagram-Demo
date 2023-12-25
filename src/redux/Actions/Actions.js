@@ -1,4 +1,4 @@
-import {ADD_DATA, CURRENT_USER} from '../Type';
+import {ADD_DATA, CURRENT_USER, ROUTE_NAME} from '../Type';
 
 export const Add_Data_Action = data => dispatch => {
   dispatch({
@@ -11,5 +11,12 @@ export const Current_User_Action = data => dispatch => {
   dispatch({
     type: CURRENT_USER,
     payload: data,
+  });
+};
+
+export const Route_name = data => dispatch => {
+  dispatch({
+    type: ROUTE_NAME,
+    payload: [...data],
   });
 };

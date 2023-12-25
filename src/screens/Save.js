@@ -21,6 +21,7 @@ import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import {Images} from '../helper/images';
 import {strings} from '../helper/string';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import Header_navigation from '../navigation/Header_navigation';
 
 const Save = () => {
   const [data, setdata] = useState([]);
@@ -57,7 +58,8 @@ const Save = () => {
                       onSnapshotData.docs.forEach(i => {
                         array.push(i.data().postList);
                       });
-                      // console.log(userdata);
+                      setvisible(false);
+                      setRefreshing(false);
                       setdata(
                         array
                           .flat()
@@ -67,6 +69,7 @@ const Save = () => {
                               ?.savedPost?.some(w => w === e.id),
                           ),
                       );
+                      setvisible(false), setRefreshing(false);
                     });
                   setUserdata(documentSnapshot?.data());
                   setvisible(false);
@@ -149,118 +152,126 @@ const Save = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={data}
-        keyExtractor={item => item.id}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={get_User_Data} />
-        }
-        renderItem={({item, index}) => {
-          return (
-            <View style={styles?.card_container}>
-              <View style={styles?.card_header}>
-                <View style={styles?.header_contain}>
-                  <Image
-                    source={{uri: item?.profile_picture}}
-                    style={styles?.profile_img}
-                  />
-                  <View>
-                    <Text style={styles?.account_name}>
-                      {user?.firstname} {user?.lastname}
-                    </Text>
-                    <Text style={styles?.title}>{item?.title}</Text>
-                  </View>
-                </View>
-                <View style={styles?.counter}>
-                  <Text style={styles?.counter_lable}>
-                    {item?.images?.length > 1 ? (
-                      <Text>
-                        {currentIndex}/{item?.images?.length}
+      <Header_navigation title={'Save'} />
+      {data.length == 0 ? (
+        <View style={styles?.warning_container}>
+          <Text>{strings?.NO_save}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={get_User_Data} />
+          }
+          renderItem={({item, index}) => {
+            return (
+              <View style={styles?.card_container}>
+                <View style={styles?.card_header}>
+                  <View style={styles?.header_contain}>
+                    <Image
+                      source={{uri: item?.profile_picture}}
+                      style={styles?.profile_img}
+                    />
+                    <View>
+                      <Text style={styles?.account_name}>
+                        {user?.firstname} {user?.lastname}
                       </Text>
-                    ) : null}
-                  </Text>
-                </View>
-              </View>
-              <SwiperFlatList
-                style={{width}}
-                ref={current_index}
-                index={0}
-                onChangeIndex={() =>
-                  setcurrentIndex(current_index?.current?.getCurrentIndex() + 1)
-                }
-                bounces={false}
-                data={item?.images}
-                renderItem={({item, index}) => (
-                  <>
-                    <Image
-                      source={{uri: item?.path}}
-                      style={styles?.profile_picture}
-                    />
-                  </>
-                )}
-              />
-              <View style={styles?.footer_container}>
-                <View style={styles?.like_container}>
-                  <TouchableOpacity
-                    onPress={async () => {
-                      item?.user_likes?.some(val => val == item?.uid)
-                        ? un_like_handler(item)
-                        : like_handler(item);
-                    }}>
-                    <Image
-                      source={
-                        item?.user_likes?.some(val => val == item?.uid)
-                          ? Images?.likefill
-                          : Images?.like
-                      }
-                      style={styles?.like}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    <Image source={Images?.comment} style={styles?.like} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={async () => {
-                      userdata.savedPost.some(i => i == item.id)
-                        ? un_save_post_handler(item)
-                        : save_post_handler(item);
-                    }}>
-                    <Image
-                      source={
-                        userdata.savedPost.some(i => i == item.id)
-                          ? Images.savefill
-                          : Images.save
-                      }
-                      style={styles?.like}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles?.discription_container}>
-                <Text style={styles?.username}>
-                  {user?.firstname} {user?.lastname}
-                </Text>
-                <Text style={styles?.description}>{item?.description}</Text>
-              </View>
-              <View style={styles?.like_section}>
-                {item?.user_likes?.length == 0 ? null : (
-                  <View style={styles?.like_header}>
-                    <Text style={styles?.like_title}>{strings?.like} by</Text>
-                    <Text style={{color: Colors?.black}}>
-                      {users}
-                      {item?.user_likes?.length == 1 ? null : (
-                        <Text> {item?.user_likes?.length - 1} Other</Text>
-                      )}
+                      <Text style={styles?.title}>{item?.title}</Text>
+                    </View>
+                  </View>
+                  <View style={styles?.counter}>
+                    <Text style={styles?.counter_lable}>
+                      {item?.images?.length > 1 ? (
+                        <Text>
+                          {currentIndex}/{item?.images?.length}
+                        </Text>
+                      ) : null}
                     </Text>
                   </View>
-                )}
+                </View>
+                <SwiperFlatList
+                  style={{width}}
+                  ref={current_index}
+                  index={0}
+                  onChangeIndex={() =>
+                    setcurrentIndex(
+                      current_index?.current?.getCurrentIndex() + 1,
+                    )
+                  }
+                  bounces={false}
+                  data={item?.images}
+                  renderItem={({item, index}) => (
+                    <>
+                      <Image
+                        source={{uri: item?.path}}
+                        style={styles?.profile_picture}
+                      />
+                    </>
+                  )}
+                />
+                <View style={styles?.footer_container}>
+                  <View style={styles?.like_container}>
+                    <TouchableOpacity
+                      onPress={async () => {
+                        item?.user_likes?.some(val => val == item?.uid)
+                          ? un_like_handler(item)
+                          : like_handler(item);
+                      }}>
+                      <Image
+                        source={
+                          item?.user_likes?.some(val => val == item?.uid)
+                            ? Images?.likefill
+                            : Images?.like
+                        }
+                        style={styles?.like}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <Image source={Images?.comment} style={styles?.like} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={async () => {
+                        userdata.savedPost.some(i => i == item.id)
+                          ? un_save_post_handler(item)
+                          : save_post_handler(item);
+                      }}>
+                      <Image
+                        source={
+                          userdata.savedPost.some(i => i == item.id)
+                            ? Images.savefill
+                            : Images.save
+                        }
+                        style={styles?.like}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <View style={styles?.discription_container}>
+                  <Text style={styles?.username}>
+                    {user?.firstname} {user?.lastname}
+                  </Text>
+                  <Text style={styles?.description}>{item?.description}</Text>
+                </View>
+                <View style={styles?.like_section}>
+                  {item?.user_likes?.length == 0 ? null : (
+                    <View style={styles?.like_header}>
+                      <Text style={styles?.like_title}>{strings?.like} by</Text>
+                      <Text style={{color: Colors?.black}}>
+                        {users}
+                        {item?.user_likes?.length == 1 ? null : (
+                          <Text> {item?.user_likes?.length - 1} Other</Text>
+                        )}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-          );
-        }}
-      />
-
+            );
+          }}
+        />
+      )}
       <Modals visible={visible} />
     </SafeAreaView>
   );
@@ -355,5 +366,11 @@ const styles = StyleSheet.create({
   },
   description: {
     color: colors?.black,
+  },
+  warning_container: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

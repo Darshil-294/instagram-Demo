@@ -29,8 +29,9 @@ import Btn from '../components/common/Btn';
 import {useDispatch} from 'react-redux';
 import {Current_User_Action} from '../redux/Actions/Actions';
 import {ValidationHandler} from '../helper/constants';
+import Header_navigation from '../navigation/Header_navigation';
 
-const Profile = () => {
+const Profile = ({navigation}) => {
   const [data, setdata] = useState([]);
   const [visible, setvisible] = useState(false);
   const [change_credentials_modal, setchange_credentials_modal] =
@@ -43,7 +44,6 @@ const Profile = () => {
   const [password, setpassword] = useState('');
   const [credentials_verify, setcredentials_verify] = useState('');
   const [confirm, setconfirm] = useState(false);
-
   useEffect(() => {
     user_data();
   }, [visible]);
@@ -73,66 +73,60 @@ const Profile = () => {
   };
 
   const save_data = async () => {
-    // let url;
-    // let user;
-    // let reference;
-    // let res;
-    // if (data?.email === email || data?.password === password) {
-    // }
-    // if (images === data?.profile_picture) {
-    //   url = data?.profile_picture;
-    // } else {
-    //   const filename = images?.substring(
-    //     images?.lastIndexOf('/') + 1,
-    //     images?.length,
-    //   );
-    //   await new Promise.all(
-    //     (reference = firebase.storage()?.ref(filename)),
-    //     (res = await reference.putFile(images)),
-    //     (url = await firebase
-    //       .storage()
-    //       ?.ref(res.metadata.name)
-    //       ?.getDownloadURL()),
-    //   );
-    // }
-    // user = {
-    //   uid: firebase?.auth().currentUser?.uid,
-    //   firstname: firstname,
-    //   lastname: lastname,
-    //   email: email.toLocaleLowerCase(),
-    //   password: password,
-    //   profile_picture: url,
-    //   full_name: firstname + ' ' + lastname,
-    //   phone: phone,
-    // };
-    // await firestore()
-    //   ?.collection('users')
-    //   ?.doc(firebase?.auth().currentUser?.uid)
-    //   ?.update(user)
-    //   ?.then(() => {
-    //     console.log('User add successfully!');
-    //     DISPATCH(Current_User_Action(user));
-    //     setvisible(false);
-    //   })
-    //   ?.catch(errr => {
-    //     console.log(errr);
-    //     setvisible(false);
-    //   });
+    let url;
+    let user;
+    let reference;
+    let res;
+    if (data?.email === email || data?.password === password) {
+    }
+    if (images === data?.profile_picture) {
+      url = data?.profile_picture;
+    } else {
+      const filename = images?.substring(
+        images?.lastIndexOf('/') + 1,
+        images?.length,
+      );
+      await new Promise.all(
+        (reference = firebase.storage()?.ref(filename)),
+        (res = await reference.putFile(images)),
+        (url = await firebase
+          .storage()
+          ?.ref(res.metadata.name)
+          ?.getDownloadURL()),
+      );
+    }
+    user = {
+      uid: firebase?.auth().currentUser?.uid,
+      firstname: firstname,
+      lastname: lastname,
+      email: email.toLocaleLowerCase(),
+      password: password,
+      profile_picture: url,
+      full_name: firstname + ' ' + lastname,
+      phone: phone,
+    };
+    await firestore()
+      ?.collection('users')
+      ?.doc(firebase?.auth().currentUser?.uid)
+      ?.update(user)
+      ?.then(() => {
+        console.log('User add successfully!');
+        DISPATCH(Current_User_Action(user));
+        setvisible(false);
+        navigation?.navigate('Login');
+      })
+      ?.catch(errr => {
+        console.log(errr);
+        setvisible(false);
+      });
   };
 
   const update_credentials = async () => {
     const mail_URL = 'https://mail.google.com/mail';
     if (data?.email == email && data?.password == password) {
+      setvisible(false);
     } else {
       if (data?.email !== email) {
-        const user = firebase.auth().currentUser;
-        user
-          .updateEmail('user01@gmail.com')
-          .then(async res => {})
-          .catch(error => {
-            console.log('error', error);
-          });
-
         setcredentials_verify('email');
         setchange_credentials_modal(true);
       }
@@ -150,6 +144,11 @@ const Profile = () => {
       .sendPasswordResetEmail(email)
       .then(async res => {
         await Linking.openURL(mail_URL);
+        setchange_credentials_modal(false);
+        save_data();
+      })
+      .then(res => {
+        setvisible(false);
       })
       .catch(async error => {
         let errorCode = error.code;
@@ -177,6 +176,7 @@ const Profile = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header_navigation title={'Profile'} />
       <View>
         <TouchableOpacity onPress={() => setvisible(true)}>
           <Image source={Images?.dots} style={styles?.dots} />
@@ -251,29 +251,29 @@ const Profile = () => {
                 )
               }
             />
+            <Modals
+              visible={change_credentials_modal}
+              animation="fade"
+              close={setchange_credentials_modal}
+              contain={
+                <View style={styles?.alert_container}>
+                  <Text style={styles?.credentials_alert}>
+                    {credentials_verify == 'password'
+                      ? `You have submitted a password change request !`
+                      : ''}
+                  </Text>
+                  <View style={styles?.btn_conatiner}>
+                    <Btn
+                      title="Yes"
+                      onpress={() => {
+                        update_password();
+                      }}
+                    />
+                  </View>
+                </View>
+              }
+            />
           </ScrollView>
-        }
-      />
-      <Modals
-        visible={change_credentials_modal}
-        animation="fade"
-        close={setchange_credentials_modal}
-        contain={
-          <View style={styles?.alert_container}>
-            <Text style={styles?.credentials_alert}>
-              {credentials_verify == 'password'
-                ? `You have submitted a password change request !`
-                : ''}
-            </Text>
-            <View style={styles?.btn_conatiner}>
-              <Btn
-                title="Yes"
-                onpress={() => {
-                  update_password();
-                }}
-              />
-            </View>
-          </View>
         }
       />
     </SafeAreaView>

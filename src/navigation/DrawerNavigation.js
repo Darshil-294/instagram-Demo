@@ -5,20 +5,17 @@ import BottomNavigation from './BottomNavigation';
 import DrawerScreen from './DrawerScreen';
 import {Images} from '../helper/images';
 import {wp} from '../helper/global';
+import {useSelector} from 'react-redux';
 
 const DrawerNavigation = ({}) => {
   const Drawer = createDrawerNavigator();
+
   return (
     <Drawer.Navigator
       screenOptions={({navigation}) => ({
         drawerType: 'front',
         title: 'Instagram',
-        // headerShown: false,
-        headerLeft: props => (
-          <TouchableOpacity onPress={() => navigation?.openDrawer()}>
-            <Image source={Images.menu} style={styles.menu} />
-          </TouchableOpacity>
-        ),
+        headerShown: false,
       })}
       drawerContent={props => <DrawerScreen {...props} />}>
       <Drawer.Screen name="Bottom" component={BottomNavigation} />

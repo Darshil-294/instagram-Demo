@@ -19,4 +19,6 @@ export const strings = {
   description: 'Description',
   post: 'Post',
   like: 'Like',
+  NO_post: 'No Post at the moment !',
+  NO_save: 'No Saved Post at the moment !',
 };

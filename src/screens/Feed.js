@@ -22,6 +22,7 @@ import Modals from '../components/common/Modals';
 import storage from '@react-native-firebase/storage';
 import {template} from '@babel/core';
 import {useSelector} from 'react-redux';
+import Header_navigation from '../navigation/Header_navigation';
 
 const Feed = ({navigation}) => {
   const [images, setimages] = useState([]);
@@ -137,6 +138,7 @@ const Feed = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header_navigation title={'Feed'} />
       <View style={styles.container}>
         <Text style={styles.title}>{strings.Add_post}</Text>
         <TouchableOpacity style={styles.add_post} onPress={image}>

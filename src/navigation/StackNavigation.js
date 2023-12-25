@@ -5,24 +5,24 @@ import Register from '../screens/Register';
 import {useSelector} from 'react-redux';
 import DrawerNavigation from './DrawerNavigation';
 import {NavigationContainer} from '@react-navigation/native';
-const stack = createStackNavigator();
+const Stack = createStackNavigator();
 
 const StackNavigation = props => {
   const user = useSelector(state => state?.user?.currentuser);
 
   return (
     <NavigationContainer>
-      <stack.Navigator
+      <Stack.Navigator
         initialRouteName={user ? 'Drawer' : 'Login'}
-        screenOptions={{headerShown: false}}>
-        <stack.Screen
+        screenOptions={{headerShown: false, statusBarHidden: true}}>
+        <Stack.Screen
           options={{gestureEnabled: false}}
           name="Login"
           component={Login}
         />
-        <stack.Screen name="Register" component={Register} />
-        <stack.Screen name="Drawer" component={DrawerNavigation} />
-      </stack.Navigator>
+        <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="Drawer" component={DrawerNavigation} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

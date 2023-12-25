@@ -64,6 +64,7 @@ const Register = ({navigation}) => {
           full_name: firstname + ' ' + lastname,
           savedPost: [],
           phone: phone,
+          followers: [],
         };
         await firestore()
           ?.collection('users')
@@ -189,7 +190,7 @@ const Register = ({navigation}) => {
             )
           }
           style={styles.btn}
-          title_style={{fontFamily: 'Outfit-Regular'}}
+          title_style={{fontFamily: 'Outfit-Medium'}}
         />
         <Modals visible={modal} />
       </KeyboardAwareScrollView>
