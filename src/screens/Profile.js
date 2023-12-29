@@ -1,5 +1,6 @@
 import {
   Alert,
+  FlatList,
   Image,
   Linking,
   Platform,
@@ -37,6 +38,7 @@ const Profile = ({navigation}) => {
   const [change_credentials_modal, setchange_credentials_modal] =
     useState(false);
   const [images, setimages] = useState([]);
+  const [post, setpost] = useState([]);
   const [firstname, setfirstname] = useState('');
   const [lastname, setlastname] = useState('');
   const [email, setemail] = useState('');
@@ -44,9 +46,14 @@ const Profile = ({navigation}) => {
   const [password, setpassword] = useState('');
   const [credentials_verify, setcredentials_verify] = useState('');
   const [confirm, setconfirm] = useState(false);
+
   useEffect(() => {
     user_data();
-  }, [visible]);
+  }, [data]);
+
+  useEffect(() => {
+    user_post();
+  }, []);
 
   const DISPATCH = useDispatch();
 
@@ -69,6 +76,24 @@ const Profile = ({navigation}) => {
         });
     } catch (error) {
       console.log('error', error);
+    }
+  };
+
+  const user_post = async () => {
+    let datas = [];
+    try {
+      firestore()
+        ?.collection('post')
+        ?.doc(auth()?.currentUser?.uid)
+        ?.onSnapshot(async res => {
+          datas = [];
+          await res?.data()?.postList?.map(item => {
+            datas.push(...item?.images);
+            setpost(datas);
+          });
+        });
+    } catch (error) {
+      console.log('Error', error);
     }
   };
 
@@ -177,29 +202,79 @@ const Profile = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <Header_navigation title={'Profile'} />
-      <View>
-        <TouchableOpacity onPress={() => setvisible(true)}>
-          <Image source={Images?.dots} style={styles?.dots} />
-        </TouchableOpacity>
+      <View style={styles?.profile_conatiner}>
+        <Image style={styles?.profile} source={{uri: data?.profile_picture}} />
+        <View style={styles?.counter_container}>
+          <View style={styles?.count_container}>
+            <View style={styles?.countr_container}>
+              <Text style={styles?.counter_title}>{post.length}</Text>
+              <Text style={styles?.counter_title}>Post</Text>
+            </View>
+
+            <View style={styles?.countr_container}>
+              <Text style={styles?.counter_title}>0</Text>
+              <Text style={styles?.counter_title}>Followers</Text>
+            </View>
+
+            <View style={styles?.countr_container}>
+              <Text style={styles?.counter_title}>0</Text>
+              <Text style={styles?.counter_title}>Following</Text>
+            </View>
+          </View>
+          <TouchableOpacity onPress={() => setvisible(true)}>
+            <Text style={styles?.edit_btn}>Edit Profile</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      <View
+        style={
+          post.length != 0
+            ? styles?.post_containers
+            : styles?.warnning_container
+        }>
+        {post.length == 0 ? (
+          <Text style={styles?.warnning}>{strings?.NO_post}</Text>
+        ) : (
+          <FlatList
+            data={post}
+            numColumns={3}
+            keyExtractor={item => item.path}
+            bounces={false}
+            renderItem={({item, index}) => {
+              return (
+                <View style={styles?.post_container}>
+                  <Image
+                    source={{uri: item?.path}}
+                    style={styles?.post_image}
+                  />
+                </View>
+              );
+            }}
+          />
+        )}
+      </View>
+
       <Modals
         visible={visible}
         containStyle={styles?.modal_contain}
         containerStyle={styles?.modal}
         animation="slide"
         close={setvisible}
+        title="Edit Profile"
         contain={
           <ScrollView
             style={{
               width: '100%',
             }}>
-            <Text style={styles?.title}>Edit Profile</Text>
             <View>
               <TouchableOpacity style={styles.img_container} onPress={image}>
                 <Image
                   resizeMode="contain"
                   style={images != '' ? styles.img : styles.img2}
-                  source={images === '' ? {uri: images} : {uri: images}}
+                  source={
+                    images === '' ? {uri: data?.profile_picture} : {uri: images}
+                  }
                 />
               </TouchableOpacity>
             </View>
@@ -286,7 +361,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    // justifyContent: 'space-between',
   },
   dots: {
     width: wp(20),
@@ -355,5 +429,68 @@ const styles = StyleSheet.create({
     gap: wp(15),
     justifyContent: 'center',
     marginTop: hp(20),
+  },
+  profile: {
+    width: wp(70),
+    height: wp(70),
+    borderRadius: 50,
+  },
+  profile_conatiner: {
+    paddingHorizontal: wp(20),
+    flexDirection: 'row',
+    paddingVertical: hp(20),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomColor: colors?.light_gray,
+    borderBottomWidth: 1,
+    paddingBottom: hp(20),
+  },
+  count_container: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingHorizontal: wp(30),
+  },
+  countr_container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  counter_title: {
+    color: colors?.black,
+    fontFamily: 'Outfit-Medium',
+    fontSize: fs(15),
+  },
+  edit_btn: {
+    color: colors?.blue,
+    fontSize: fs(18),
+    fontFamily: 'Outfit-Medium',
+  },
+  counter_container: {
+    flex: 1,
+    alignItems: 'center',
+    gap: wp(10),
+  },
+  post_image: {
+    width: wp(110),
+    height: wp(110),
+  },
+  post_container: {
+    marginBottom: hp(10),
+    flexWrap: 'wrap',
+    marginHorizontal: wp(5),
+  },
+  post_containers: {
+    marginHorizontal: wp(7),
+    marginVertical: hp(15),
+    alignItems: 'flex-start',
+  },
+  warnning_container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  warnning: {
+    color: colors?.black,
   },
 });

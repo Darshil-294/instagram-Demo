@@ -9,8 +9,9 @@ import {
   View,
 } from 'react-native';
 import React, {useState} from 'react';
-import {hp, wp} from '../../helper/global';
+import {fs, hp, wp} from '../../helper/global';
 import {Images} from '../../helper/images';
+import {colors} from '../../helper/colors';
 
 interface modals {
   visible?: boolean;
@@ -20,6 +21,8 @@ interface modals {
   close?: any;
   containStyle?: TextStyle;
   containerStyle?: TextStyle;
+  title?: string;
+  title_style?: TextStyle;
 }
 
 const Indicator = (
@@ -43,6 +46,8 @@ const Modals = ({
   close,
   containStyle,
   containerStyle,
+  title = 'Title',
+  title_style,
 }: modals) => {
   return (
     <Modal
@@ -59,6 +64,7 @@ const Modals = ({
             <TouchableOpacity style={styles.colse} onPress={() => close(false)}>
               <Image source={Images.close} style={styles.img} />
             </TouchableOpacity>
+            <Text style={[styles?.title, title_style]}>{title}</Text>
             {contain}
           </View>
         )}
@@ -99,5 +105,11 @@ const styles = StyleSheet.create({
     // alignSelf: 'center',
     alignSelf: 'flex-end',
     marginBottom: hp(10),
+  },
+  title: {
+    fontSize: fs(22),
+    fontFamily: 'Outfit-Medium',
+    marginBottom: hp(10),
+    color: colors?.black,
   },
 });

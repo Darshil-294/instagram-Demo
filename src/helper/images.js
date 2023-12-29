@@ -16,4 +16,7 @@ export const Images = {
   gallery: require('../assets/img/gallery.png'),
   comment: require('../assets/img/comment.png'),
   dots: require('../assets/img/dots.png'),
+  adduser: require('../assets/img/adduser.png'),
+  bell: require('../assets/img/bell.png'),
+  bell_info: require('../assets/img/bell_info.png'),
 };

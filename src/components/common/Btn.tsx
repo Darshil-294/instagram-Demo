@@ -1,4 +1,5 @@
 import {
+  Image,
   StyleSheet,
   Text,
   TextStyle,
@@ -7,6 +8,7 @@ import {
 } from 'react-native';
 import React, {FC} from 'react';
 import {fs, hp, wp} from '../../helper/global';
+import {Images} from '../../helper/images';
 
 interface btn {
   onpress?: () => void;

@@ -65,6 +65,7 @@ const Register = ({navigation}) => {
           savedPost: [],
           phone: phone,
           followers: [],
+          request: [],
         };
         await firestore()
           ?.collection('users')
@@ -247,6 +248,7 @@ const styles = StyleSheet.create({
   btn: {
     alignSelf: 'center',
     fontFamily: 'Outfit-SemiBold',
+    marginBottom: hp(20),
   },
   social_Auth: {
     flexDirection: 'row',
@@ -259,15 +261,4 @@ const styles = StyleSheet.create({
     height: wp(30),
   },
   scroll_container: {flex: 1, justifyContent: 'space-between'},
-  // modal: {
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   flex: 1,
-  //   backgroundColor: '#00000054',
-  // },
-  // indicator: {
-  //   backgroundColor: 'white',
-  //   padding: wp(20),
-  //   borderRadius: 20,
-  // },
 });

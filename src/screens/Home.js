@@ -58,6 +58,7 @@ const Home = () => {
                           setusers(data?.data()?.full_name);
                         }),
                     );
+                  // console.log('aaa', documentSnapshot?.data()?.postList);
                   temp = [...documentSnapshot?.data()?.postList];
                   setdata(documentSnapshot?.data()?.postList);
                   setvisible(false);
@@ -172,7 +173,7 @@ const Home = () => {
       <Header_navigation title={'Home'} />
       {data.length == 0 ? (
         <View style={styles?.warning_container}>
-          <Text>{strings?.NO_post}</Text>
+          <Text style={styles?.warrning}>{strings?.NO_post}</Text>
         </View>
       ) : (
         <FlatList
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
   like_header: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 5,
+    gap: wp(5),
     flexWrap: 'wrap',
   },
   description: {
@@ -388,5 +389,8 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  warrning: {
+    color: colors?.black,
   },
 });

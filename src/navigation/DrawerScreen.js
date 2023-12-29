@@ -46,8 +46,6 @@ const DrawerScreen = ({navigation}) => {
     },
   ];
 
-  // 'Home', 'Save', 'Feed', 'Profile';
-
   const Sign_Out = async () => {
     await auth()
       .signOut()

@@ -55,6 +55,7 @@ const Save = () => {
                     .collection('post')
                     .onSnapshot(onSnapshotData => {
                       let array = [];
+                      let likes = [];
                       onSnapshotData.docs.forEach(i => {
                         array.push(i.data().postList);
                       });
@@ -331,18 +332,18 @@ const styles = StyleSheet.create({
   },
   header_contain: {
     flexDirection: 'row',
-    gap: 10,
+    gap: wp(10),
   },
   like_container: {
     flexDirection: 'row',
-    gap: 20,
+    gap: wp(15),
     alignItems: 'center',
   },
   discription_container: {
     paddingHorizontal: wp(10),
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 10,
+    gap: wp(10),
     flexWrap: 'wrap',
   },
   username: {
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
   like_header: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 5,
+    gap: wp(5),
     flexWrap: 'wrap',
   },
   description: {

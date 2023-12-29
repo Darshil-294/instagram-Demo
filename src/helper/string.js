@@ -21,4 +21,5 @@ export const strings = {
   like: 'Like',
   NO_post: 'No Post at the moment !',
   NO_save: 'No Saved Post at the moment !',
+  NO_Requests: 'No Requests at the moment !',
 };
