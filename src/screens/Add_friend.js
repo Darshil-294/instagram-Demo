@@ -18,7 +18,7 @@ import {colors} from '../helper/colors';
 
 const Add_friend = ({visible, close}) => {
   const [data, setdata] = useState([]);
-  const [render, setrender] = useState(false);
+  const [users, setusers] = useState([]);
 
   useEffect(() => {
     get_user();
@@ -49,9 +49,6 @@ const Add_friend = ({visible, close}) => {
           auth()?.currentUser?.uid,
         ),
       })
-      // .then(() => {
-      //   setrender(!render);
-      // })
       .catch(error => console.log('Error', error));
   };
 
@@ -68,6 +65,23 @@ const Add_friend = ({visible, close}) => {
       //   setrender(!render);
       // })
       .catch(error => console.log('Error', error));
+  };
+
+  const unfollow = async val => {
+    await firestore()
+      ?.collection('users')
+      ?.doc(auth()?.currentUser?.uid)
+      ?.update({following: firebase?.firestore?.FieldValue?.arrayRemove(val)})
+      ?.then(async () => {
+        firestore()
+          ?.collection('users')
+          ?.doc(val)
+          ?.update({
+            followers: firebase?.firestore?.FieldValue?.arrayRemove(
+              auth()?.currentUser?.uid,
+            ),
+          });
+      });
   };
 
   return (
@@ -108,6 +122,9 @@ const Add_friend = ({visible, close}) => {
                       onPress={() => {
                         item.request.some(e => e == auth()?.currentUser?.uid)
                           ? cancel_requst(item?.uid)
+                          : // : console.log(item?.uid);
+                          item?.followers.includes(auth()?.currentUser?.uid)
+                          ? unfollow(item?.uid)
                           : send_requst(item?.uid);
                       }}>
                       <Text
@@ -118,7 +135,9 @@ const Add_friend = ({visible, close}) => {
                         }>
                         {item.request.some(e => e == auth()?.currentUser?.uid)
                           ? 'Requested'
-                          : 'following'}
+                          : item?.followers?.every(e => e == item?.uid)
+                          ? 'Follow'
+                          : 'Following'}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -150,6 +169,8 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     paddingVertical: hp(10),
+    // backgroundColor: 'yellow',
+    maxHeight: hp(450),
   },
   profile_picture: {
     width: wp(50),
@@ -176,21 +197,29 @@ const styles = StyleSheet.create({
   btn: {
     backgroundColor: colors?.light_blue,
     paddingVertical: Platform.OS === 'ios' ? hp(6) : hp(5),
-    paddingHorizontal: Platform.OS === 'ios' ? wp(15) : wp(12),
+    paddingHorizontal: Platform.OS === 'ios' ? wp(10) : wp(12),
     borderRadius: 5,
   },
   requested_btn: {
     backgroundColor: colors?.light_gray,
     paddingVertical: Platform.OS === 'ios' ? hp(6) : hp(5),
-    paddingHorizontal: Platform.OS === 'ios' ? wp(15) : wp(12),
+    paddingHorizontal: Platform.OS === 'ios' ? wp(10) : wp(12),
     borderRadius: 5,
   },
   btn_title: {
     color: colors?.white,
     fontSize: fs(16),
+    width: wp(70),
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
   },
   requested_btn_title: {
     color: colors?.grey,
     fontSize: fs(15),
+    width: wp(70),
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
   },
 });

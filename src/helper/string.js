@@ -22,4 +22,5 @@ export const strings = {
   NO_post: 'No Post at the moment !',
   NO_save: 'No Saved Post at the moment !',
   NO_Requests: 'No Requests at the moment !',
+  NO_Followers: 'No Followers at the moment !',
 };

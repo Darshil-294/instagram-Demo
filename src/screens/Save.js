@@ -22,6 +22,12 @@ import {Images} from '../helper/images';
 import {strings} from '../helper/string';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Header_navigation from '../navigation/Header_navigation';
+import {
+  like_handler,
+  save_post_handler,
+  un_like_handler,
+  un_save_post_handler,
+} from '../helper/Functions';
 
 const Save = () => {
   const [data, setdata] = useState([]);
@@ -29,10 +35,9 @@ const Save = () => {
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
-  const [users, setusers] = useState([]);
 
   useEffect(() => {
-    get_User_Data();
+    user_data();
     // get_Data();
   }, []);
 
@@ -41,6 +46,8 @@ const Save = () => {
   const user = useSelector(state => state?.user?.currentuser);
 
   const get_User_Data = async () => {
+    let array = [];
+    let datas = [];
     try {
       setvisible(true);
       setRefreshing(true);
@@ -50,31 +57,27 @@ const Save = () => {
           querySnapshot?.docs.length == 0
             ? (setvisible(false), setRefreshing(false))
             : querySnapshot?.forEach(documentSnapshot => {
+                array = [];
+                datas = [];
                 if (documentSnapshot?.id == auth()?.currentUser?.uid) {
                   firestore()
                     .collection('post')
                     .onSnapshot(onSnapshotData => {
-                      let array = [];
-                      let likes = [];
-                      onSnapshotData.docs.forEach(i => {
-                        array.push(i.data().postList);
+                      onSnapshotData.docs.map(i => {
+                        array.push(...i.data().postList);
                       });
                       setvisible(false);
                       setRefreshing(false);
-                      setdata(
-                        array
-                          .flat()
-                          .filter(e =>
-                            documentSnapshot
-                              ?.data()
-                              ?.savedPost?.some(w => w === e.id),
+                      array?.map(i =>
+                        documentSnapshot
+                          ?.data()
+                          ?.savedPost?.some(e =>
+                            e === i?.id ? datas?.push(i) : null,
                           ),
-                      );
-                      setvisible(false), setRefreshing(false);
+                      ),
+                        setdata(datas);
                     });
-                  setUserdata(documentSnapshot?.data());
-                  setvisible(false);
-                  setRefreshing(false);
+                  console.log(data);
                 }
               });
         });
@@ -85,71 +88,131 @@ const Save = () => {
     }
   };
 
-  const like_handler = async value => {
-    try {
-      await firestore()
-        ?.collection('post')
-        .doc(value?.uid)
-        .get()
-        .then(async d => {
-          await firestore()
-            ?.collection('post')
-            .doc(value?.uid)
-            .update({
-              postList: d.data().postList.map(i => {
-                if (i.id === value.id) {
-                  i.user_likes = [...i.user_likes, auth().currentUser.uid];
-                  return i;
-                }
-                return i;
-              }),
-            });
+  const user_data = async () => {
+    firestore()
+      ?.collection('users')
+      ?.onSnapshot(res => {
+        res?.docs?.map(doc => {
+          if (doc?.id == auth()?.currentUser?.uid) {
+            setUserdata(doc?.data());
+          }
         });
-    } catch (error) {
-      console.log('error', error);
-    }
+      });
+
+    get_User_Data();
   };
 
-  const un_like_handler = async value => {
-    await firestore()
-      ?.collection('post')
-      .doc(value?.uid)
-      .get()
-      .then(async d => {
-        await firestore()
-          ?.collection('post')
-          .doc(value?.uid)
-          .update({
-            postList: d.data().postList.map(i => {
-              if (i.id == value.id) {
-                i.user_likes = i.user_likes.filter(
-                  a => a !== auth().currentUser.uid,
-                );
-                return i;
-              }
-              return i;
-            }),
-          });
-      });
-  };
+  // const get_User_Data = async () => {
+  //   try {
+  //     setvisible(true);
+  //     setRefreshing(true);
+  //     firestore()
+  //       ?.collection('users')
+  //       ?.onSnapshot(async querySnapshot => {
+  //         querySnapshot?.docs.length == 0
+  //           ? (setvisible(false), setRefreshing(false))
+  //           : querySnapshot?.forEach(documentSnapshot => {
+  //               if (documentSnapshot?.id == auth()?.currentUser?.uid) {
+  //                 firestore()
+  //                   .collection('post')
+  //                   .onSnapshot(onSnapshotData => {
+  //                     let array = [];
+  //                     onSnapshotData.docs.forEach(i => {
+  //                       array.push(i.data().postList);
+  //                     });
+  //                     console.log(
+  //                       'arrry',
+  //                       array
+  //                         .flat()
+  //                         .filter(e =>
+  //                           documentSnapshot
+  //                             ?.data()
+  //                             ?.savedPost?.some(w => w === e.id),
+  //                         ),
+  //                     );
+  //                     setvisible(false);
+  //                     setRefreshing(false);
+  //                     setdata(
+  //                       array
+  //                         .flat()
+  //                         .filter(e =>
+  //                           documentSnapshot
+  //                             ?.data()
+  //                             ?.savedPost?.some(w => w === e.id),
+  //                         ),
+  //                     );
+  //                     setvisible(false), setRefreshing(false);
+  //                   });
+  //                 setUserdata(documentSnapshot?.data());
+  //                 setvisible(false);
+  //                 setRefreshing(false);
+  //               }
+  //             });
+  //       });
+  //   } catch (error) {
+  //     setvisible(false);
+  //     setRefreshing(false);
+  //     console.log('Error', error);
+  //   }
+  // };
 
-  const save_post_handler = async value => {
-    await firestore()
-      ?.collection('users')
-      .doc(value?.uid)
-      .update({
-        savedPost: firebase.firestore.FieldValue.arrayUnion(value?.id),
-      });
-  };
+  // const like_handler = async value => {
+  //   try {
+  //     await firestore()
+  //       ?.collection('post')
+  //       .doc(value?.uid)
+  //       .get()
+  //       .then(async d => {
+  //         await firestore()
+  //           ?.collection('post')
+  //           .doc(value?.uid)
+  //           .update({
+  //             postList: d.data().postList.map(i => {
+  //               if (i.id === value.id) {
+  //                 i.user_likes = [...i.user_likes, auth().currentUser.uid];
+  //                 return i;
+  //               }
+  //               return i;
+  //             }),
+  //           });
+  //       });
+  //   } catch (error) {
+  //     console.log('error', error);
+  //   }
+  // };
 
-  const un_save_post_handler = async value => {
-    await firestore()
-      ?.collection('users')
-      .doc(value?.uid)
-      .update({
-        savedPost: firebase.firestore.FieldValue.arrayRemove(value?.id),
-      });
-  };
+  // // const like_handler = async value => {
+  // //   try {
+  // //     await firestore()
+  // //       ?.collection('post')
+  // //       .doc(value?.uid)?.update({po})
+  // //   } catch (error) {
+  // //     console.log('error', error);
+  // //   }
+  // // };
+
+  // const un_like_handler = async value => {
+  //   await firestore()
+  //     ?.collection('post')
+  //     .doc(value?.uid)
+  //     .get()
+  //     .then(async d => {
+  //       await firestore()
+  //         ?.collection('post')
+  //         .doc(value?.uid)
+  //         .update({
+  //           postList: d.data().postList.map(i => {
+  //             if (i.id == value.id) {
+  //               i.user_likes = i.user_likes.filter(
+  //                 a => a !== auth().currentUser.uid,
+  //               );
+  //               return i;
+  //             }
+  //             return i;
+  //           }),
+  //         });
+  //     });
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -216,13 +279,17 @@ const Save = () => {
                   <View style={styles?.like_container}>
                     <TouchableOpacity
                       onPress={async () => {
-                        item?.user_likes?.some(val => val == item?.uid)
+                        item?.user_likes?.some(
+                          val => val === auth()?.currentUser?.uid,
+                        )
                           ? un_like_handler(item)
                           : like_handler(item);
                       }}>
                       <Image
                         source={
-                          item?.user_likes?.some(val => val == item?.uid)
+                          item?.user_likes?.some(
+                            val => val == auth()?.currentUser?.uid,
+                          )
                             ? Images?.likefill
                             : Images?.like
                         }
@@ -260,7 +327,7 @@ const Save = () => {
                     <View style={styles?.like_header}>
                       <Text style={styles?.like_title}>{strings?.like} by</Text>
                       <Text style={{color: Colors?.black}}>
-                        {users}
+                        {item?.user_likes?.length}
                         {item?.user_likes?.length == 1 ? null : (
                           <Text> {item?.user_likes?.length - 1} Other</Text>
                         )}

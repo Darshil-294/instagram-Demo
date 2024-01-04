@@ -2,6 +2,8 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Modal,
+  Platform,
   RefreshControl,
   SafeAreaView,
   StyleSheet,
@@ -10,162 +12,87 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
-import firestore, {firebase} from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
 import Modals from '../components/common/Modals';
 import {fs, hp, wp} from '../helper/global';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {colors} from '../helper/colors';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import {Images} from '../helper/images';
 import {strings} from '../helper/string';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Header_navigation from '../navigation/Header_navigation';
+import {
+  like_handler,
+  save_post_handler,
+  un_like_handler,
+  un_save_post_handler,
+} from '../helper/Functions';
+import firestore, {firebase} from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 const Home = () => {
   const [data, setdata] = useState([]);
-  const [userdata, setUserdata] = useState({});
+  const [userdata, setUserdata] = useState([]);
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
-  const [users, setusers] = useState([]);
 
   useEffect(() => {
-    get_User_Data();
+    user_data();
+    // App();
   }, []);
 
   const current_index = useRef(null);
+  const DISPATCH = useDispatch();
 
   const user = useSelector(state => state?.user?.currentuser);
-  const get_Data = async () => {
-    try {
-      setvisible(true);
-      setRefreshing(true);
-      firestore()
-        ?.collection('post')
-        ?.onSnapshot(querySnapshot => {
-          querySnapshot?.docs.length == 0
-            ? (setvisible(false), setRefreshing(false))
-            : querySnapshot?.forEach(documentSnapshot => {
-                if (documentSnapshot?.id == auth()?.currentUser?.uid) {
-                  documentSnapshot
-                    ?.data()
-                    ?.postList[0].user_likes.map(async i =>
-                      firestore()
-                        ?.collection('users')
-                        ?.doc(i)
-                        ?.onSnapshot(data => {
-                          setusers(data?.data()?.full_name);
-                        }),
-                    );
-                  // console.log('aaa', documentSnapshot?.data()?.postList);
-                  temp = [...documentSnapshot?.data()?.postList];
-                  setdata(documentSnapshot?.data()?.postList);
-                  setvisible(false);
-                  setRefreshing(false);
-                } else {
-                  setvisible(false), setRefreshing(false);
-                }
-              });
+  const home_post = useSelector(state => state?.user?.home_post);
+  const get_main_Data = useSelector(state => state?.user?.get_multi_user);
+
+  const user_data = async () => {
+    firestore()
+      ?.collection('users')
+      ?.onSnapshot(res => {
+        res?.docs?.map(doc => {
+          if (doc?.id == auth()?.currentUser?.uid) {
+            setUserdata(doc?.data());
+          }
         });
-    } catch (error) {
-      setvisible(false);
-      setRefreshing(false);
-      console.log('error', error);
-    }
+      });
+
+    get_User_Post();
   };
-  const get_User_Data = async () => {
-    try {
-      setvisible(true);
-      setRefreshing(true);
-      await Promise.all(
-        firestore()
-          ?.collection('users')
-          ?.onSnapshot(async querySnapshot => {
-            querySnapshot?.docs.length == 0
-              ? (setvisible(false), setRefreshing(false))
-              : querySnapshot?.forEach(documentSnapshot => {
-                  if (documentSnapshot?.id == auth()?.currentUser?.uid) {
-                    setUserdata(documentSnapshot?.data());
-                    setvisible(false);
-                    setRefreshing(false);
-                  }
+
+  const get_User_Post = async () => {
+    setvisible(true);
+    setRefreshing(true);
+    let data = [];
+    firestore()
+      ?.collection('users')
+      ?.onSnapshot(res => {
+        res?.docs?.map(item => {
+          if (item?.id === auth()?.currentUser?.uid) {
+            item?.data()?.following?.map(async i => {
+              firestore()
+                ?.collection('post')
+                ?.onSnapshot(res => {
+                  data = [];
+                  res?.docs?.map(datas => {
+                    if (
+                      datas?.id === auth()?.currentUser?.uid ||
+                      datas?.id === i
+                    ) {
+                      data?.push(datas?.data()?.postList);
+                    }
+                  });
+                  setdata(data?.flat());
                 });
-          }),
-      ).then(() => {
-        get_Data();
-      });
-    } catch (error) {
-      setvisible(false);
-      setRefreshing(false);
-      console.log('Error', error);
-    }
-  };
-
-  const like_handler = async value => {
-    try {
-      await firestore()
-        ?.collection('post')
-        .doc(value?.uid)
-        .get()
-        .then(async d => {
-          await firestore()
-            ?.collection('post')
-            .doc(value?.uid)
-            .update({
-              postList: d.data().postList.map(i => {
-                if (i.id == value.id) {
-                  i.user_likes = [...i.user_likes, auth().currentUser.uid];
-                  return i;
-                }
-                return i;
-              }),
             });
+          }
         });
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
-
-  const un_like_handler = async value => {
-    await firestore()
-      ?.collection('post')
-      .doc(value?.uid)
-      .get()
-      .then(async d => {
-        await firestore()
-          ?.collection('post')
-          .doc(value?.uid)
-          .update({
-            postList: d.data().postList.map(i => {
-              if (i.id == value.id) {
-                i.user_likes = i.user_likes.filter(
-                  a => a !== auth().currentUser.uid,
-                );
-                return i;
-              }
-              return i;
-            }),
-          });
       });
-  };
-
-  const save_post_handler = async value => {
-    await firestore()
-      ?.collection('users')
-      .doc(value?.uid)
-      .update({
-        savedPost: firebase.firestore.FieldValue.arrayUnion(value?.id),
-      });
-  };
-
-  const un_save_post_handler = async value => {
-    await firestore()
-      ?.collection('users')
-      .doc(value?.uid)
-      .update({
-        savedPost: firebase.firestore.FieldValue.arrayRemove(value?.id),
-      });
+    setvisible(false);
+    setRefreshing(false);
   };
 
   return (
@@ -178,9 +105,10 @@ const Home = () => {
       ) : (
         <FlatList
           data={data}
+          keyExtractor={item => item?.id}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={get_Data} />
+            <RefreshControl refreshing={refreshing} onRefresh={get_User_Post} />
           }
           renderItem={({item, index}) => {
             return (
@@ -192,9 +120,7 @@ const Home = () => {
                       style={styles?.profile_img}
                     />
                     <View>
-                      <Text style={styles?.account_name}>
-                        {userdata?.full_name}
-                      </Text>
+                      <Text style={styles?.account_name}>{item?.fullName}</Text>
                       <Text style={styles?.title}>{item?.title}</Text>
                     </View>
                   </View>
@@ -232,13 +158,17 @@ const Home = () => {
                   <View style={styles?.like_container}>
                     <TouchableOpacity
                       onPress={async () => {
-                        item?.user_likes?.some(val => val == item?.uid)
+                        item?.user_likes?.some(
+                          val => val === auth()?.currentUser?.uid,
+                        )
                           ? un_like_handler(item)
                           : like_handler(item);
                       }}>
                       <Image
                         source={
-                          item?.user_likes?.some(val => val == item?.uid)
+                          item?.user_likes?.some(
+                            val => val == auth()?.currentUser?.uid,
+                          )
                             ? Images?.likefill
                             : Images?.like
                         }
@@ -250,13 +180,13 @@ const Home = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={async () => {
-                        userdata?.savedPost?.some(i => i == item.id)
+                        userdata?.savedPost?.some(i => i == item?.id)
                           ? un_save_post_handler(item)
                           : save_post_handler(item);
                       }}>
                       <Image
                         source={
-                          userdata?.savedPost?.some(i => i == item.id)
+                          userdata?.savedPost?.some(i => i == item?.id)
                             ? Images.savefill
                             : Images.save
                         }
@@ -266,7 +196,7 @@ const Home = () => {
                   </View>
                 </View>
                 <View style={styles?.discription_container}>
-                  <Text style={styles?.username}>{userdata?.full_name}</Text>
+                  <Text style={styles?.username}>{item?.fullName}</Text>
                   <Text style={styles?.description}>{item?.description}</Text>
                 </View>
                 <View style={styles?.like_section}>
@@ -275,10 +205,10 @@ const Home = () => {
                       <Text style={styles?.like_title}>{strings?.like} by</Text>
                       <Text style={{color: Colors?.black}}>
                         {/* {console.log('u', users)} */}
-                        {users}
-                        {item?.user_likes?.length == 1 ? null : (
+                        {item?.user_likes?.length}
+                        {/* {item?.user_likes?.length == 1 ? null : (
                           <Text> {item?.user_likes?.length - 1} Other</Text>
-                        )}
+                        )} */}
                       </Text>
                     </View>
                   )}

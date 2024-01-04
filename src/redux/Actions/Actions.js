@@ -1,4 +1,10 @@
-import {ADD_DATA, CURRENT_USER, ROUTE_NAME} from '../Type';
+import {
+  ADD_DATA,
+  CURRENT_USER,
+  GET_MULTI_USER,
+  HOME_POST,
+  ROUTE_NAME,
+} from '../Type';
 
 export const Add_Data_Action = data => dispatch => {
   dispatch({
@@ -18,5 +24,19 @@ export const Route_name = data => dispatch => {
   dispatch({
     type: ROUTE_NAME,
     payload: [...data],
+  });
+};
+
+export const Home_Action = data => dispatch => {
+  dispatch({
+    type: HOME_POST,
+    payload: data,
+  });
+};
+
+export const Get_multi_user_Action = data => dispatch => {
+  dispatch({
+    type: GET_MULTI_USER,
+    payload: data,
   });
 };

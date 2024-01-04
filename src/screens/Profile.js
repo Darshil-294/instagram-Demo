@@ -39,17 +39,20 @@ const Profile = ({navigation}) => {
     useState(false);
   const [images, setimages] = useState([]);
   const [post, setpost] = useState([]);
+  const [followers, setfollowers] = useState([]);
+  const [following, setfollowing] = useState([]);
   const [firstname, setfirstname] = useState('');
   const [lastname, setlastname] = useState('');
   const [email, setemail] = useState('');
   const [phone, setphone] = useState(Number);
   const [password, setpassword] = useState('');
   const [credentials_verify, setcredentials_verify] = useState('');
-  const [confirm, setconfirm] = useState(false);
+  const [followers_modal, setfollowers_modal] = useState(false);
+  const [following_modal, setfollowing_modal] = useState(false);
 
   useEffect(() => {
     user_data();
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     user_post();
@@ -59,23 +62,23 @@ const Profile = ({navigation}) => {
 
   const user_data = async () => {
     try {
-      await firestore()
-        ?.collection('users')
-        ?.doc(auth()?.currentUser?.uid)
-        ?.get()
-        ?.then(async res => {
-          setdata(res?.data());
-        })
-        ?.then(res => {
-          setfirstname(data?.firstname);
-          setlastname(data?.lastname);
-          setphone(data?.phone);
-          setemail(data?.email);
-          setpassword(data?.password);
-          setimages(data?.profile_picture);
-        });
+      Promise.all(
+        firestore()
+          ?.collection('users')
+          ?.doc(auth()?.currentUser?.uid)
+          ?.onSnapshot(res => {
+            setdata(res?.data());
+          }),
+      ).then(() => {
+        setfirstname(data?.firstname);
+        setlastname(data?.lastname);
+        setphone(data?.phone);
+        setemail(data?.email);
+        setpassword(data?.password);
+        setimages(data?.profile_picture);
+      });
     } catch (error) {
-      console.log('error', error);
+      console.log('error user_data', error);
     }
   };
 
@@ -89,8 +92,8 @@ const Profile = ({navigation}) => {
           datas = [];
           await res?.data()?.postList?.map(item => {
             datas.push(...item?.images);
-            setpost(datas);
           });
+          setpost(datas);
         });
     } catch (error) {
       console.log('Error', error);
@@ -199,6 +202,48 @@ const Profile = ({navigation}) => {
       });
   };
 
+  const followers_data = async () => {
+    let Followers_data = [];
+    let following_data = [];
+    await firestore()
+      ?.collection('users')
+      ?.doc(auth()?.currentUser?.uid)
+      ?.get()
+      ?.then(res => {
+        if (res?.data()?.followers) {
+          setfollowers([]);
+          Followers_data = [];
+          res?.data()?.followers.map(
+            async followers =>
+              await firestore()
+                ?.collection('users')
+                ?.doc(followers)
+                ?.get()
+                ?.then(res => {
+                  Followers_data.push(res?.data());
+                  // setfollowers(Followers_data);
+                }),
+          );
+          setfollowers(Followers_data);
+        }
+        if (res?.data()?.following) {
+          following_data = [];
+          setfollowing([]);
+
+          res?.data()?.following.map(following =>
+            firestore()
+              ?.collection('users')
+              ?.doc(following)
+              ?.get()
+              ?.then(res => {
+                following_data.push(res?.data());
+                setfollowing(following_data);
+              }),
+          );
+        }
+      });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header_navigation title={'Profile'} />
@@ -211,15 +256,28 @@ const Profile = ({navigation}) => {
               <Text style={styles?.counter_title}>Post</Text>
             </View>
 
-            <View style={styles?.countr_container}>
-              <Text style={styles?.counter_title}>0</Text>
+            <TouchableOpacity
+              onPress={() => {
+                followers_data(), setfollowers_modal(true);
+              }}
+              style={styles?.countr_container}>
+              <Text style={styles?.counter_title}>
+                {' '}
+                {data?.followers?.length}
+              </Text>
               <Text style={styles?.counter_title}>Followers</Text>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles?.countr_container}>
-              <Text style={styles?.counter_title}>0</Text>
+            <TouchableOpacity
+              style={styles?.countr_container}
+              onPress={() => {
+                followers_data(), setfollowing_modal(true);
+              }}>
+              <Text style={styles?.counter_title}>
+                {data?.following?.length}
+              </Text>
               <Text style={styles?.counter_title}>Following</Text>
-            </View>
+            </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={() => setvisible(true)}>
             <Text style={styles?.edit_btn}>Edit Profile</Text>
@@ -259,7 +317,7 @@ const Profile = ({navigation}) => {
         visible={visible}
         containStyle={styles?.modal_contain}
         containerStyle={styles?.modal}
-        animation="slide"
+        animation="fade"
         close={setvisible}
         title="Edit Profile"
         contain={
@@ -349,6 +407,88 @@ const Profile = ({navigation}) => {
               }
             />
           </ScrollView>
+        }
+      />
+
+      <Modals
+        containStyle={styles?.modal_contain}
+        containerStyle={styles?.modal}
+        visible={followers_modal}
+        close={setfollowers_modal}
+        title="Followers"
+        contain={
+          <View
+            style={
+              followers.length == 0
+                ? [styles?.follower_container, {alignItems: 'center'}]
+                : styles?.follower_container
+            }>
+            {followers.length == 0 ? (
+              <Text style={styles?.warnning}>{strings?.NO_Followers}</Text>
+            ) : (
+              <FlatList
+                data={followers}
+                renderItem={({item, index}) => {
+                  return (
+                    <View>
+                      <View style={styles?.list}>
+                        <View style={styles?.info}>
+                          <Image
+                            source={{uri: item?.profile_picture}}
+                            style={styles?.profile_picture}
+                          />
+                          <Text style={styles?.user_name}>
+                            {item?.full_name}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+            )}
+          </View>
+        }
+      />
+
+      <Modals
+        containStyle={styles?.modal_contain}
+        containerStyle={styles?.modal}
+        visible={following_modal}
+        close={setfollowing_modal}
+        title="Following"
+        contain={
+          <View
+            style={
+              following.length == 0
+                ? [styles?.follower_container, {alignItems: 'center'}]
+                : styles?.follower_container
+            }>
+            {following.length == 0 ? (
+              <Text style={styles?.warnning}>{strings?.NO_Followers}</Text>
+            ) : (
+              <FlatList
+                data={following}
+                renderItem={({item, index}) => {
+                  return (
+                    <View>
+                      <View style={styles?.list}>
+                        <View style={styles?.info}>
+                          <Image
+                            source={{uri: item?.profile_picture}}
+                            style={styles?.profile_picture}
+                          />
+                          <Text style={styles?.user_name}>
+                            {item?.full_name}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+            )}
+          </View>
         }
       />
     </SafeAreaView>
@@ -492,5 +632,38 @@ const styles = StyleSheet.create({
   },
   warnning: {
     color: colors?.black,
+    marginVertical: hp(50),
+  },
+  follower_container: {
+    width: '100%',
+    maxHeight: hp(450),
+    // backgroundColor: 'yellow',
+  },
+  list: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingVertical: hp(10),
+  },
+  profile_picture: {
+    width: wp(50),
+    height: wp(50),
+    borderRadius: 50,
+  },
+  title: {
+    color: colors?.black,
+    fontSize: fs(16),
+    fontFamily: 'Outfit-Medium',
+  },
+  info: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(10),
+  },
+  user_name: {
+    color: colors?.black,
+    fontSize: fs(18),
+    fontFamily: 'Outfit-Medium',
   },
 });

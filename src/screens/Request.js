@@ -13,6 +13,8 @@ const Request = ({visible, close, notification}) => {
   data?.length > 0 ? notification(true) : notification(false);
 
   useEffect(() => {
+    // console.log('hi', visible);
+    // visible == false ? get_data() : null;
     get_data();
   }, []);
 
@@ -46,6 +48,24 @@ const Request = ({visible, close, notification}) => {
       ?.doc(auth()?.currentUser?.uid)
       ?.update({
         request: firebase?.firestore?.FieldValue?.arrayRemove(value),
+      });
+  };
+
+  const add_follower = async value => {
+    await firestore()
+      ?.collection('users')
+      ?.doc(auth()?.currentUser?.uid)
+      ?.update({followers: firebase?.firestore?.FieldValue?.arrayUnion(value)})
+      .then(async () => {
+        delete_request(value);
+        await firestore()
+          ?.collection('users')
+          ?.doc(value)
+          ?.update({
+            following: firebase?.firestore?.FieldValue?.arrayUnion(
+              auth()?.currentUser?.uid,
+            ),
+          });
       });
   };
 
@@ -89,7 +109,9 @@ const Request = ({visible, close, notification}) => {
                         <View style={styles?.btn_container}>
                           <TouchableOpacity
                             style={styles?.btn}
-                            onPress={() => {}}>
+                            onPress={() => {
+                              add_follower(item?.uid);
+                            }}>
                             <Text style={styles?.btn_title}>{'Confirm'}</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
@@ -137,6 +159,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     paddingVertical: hp(10),
+    maxHeight: hp(450),
   },
   profile_picture: {
     width: wp(50),

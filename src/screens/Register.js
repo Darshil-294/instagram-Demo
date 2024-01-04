@@ -66,6 +66,7 @@ const Register = ({navigation}) => {
           phone: phone,
           followers: [],
           request: [],
+          following: [],
         };
         await firestore()
           ?.collection('users')

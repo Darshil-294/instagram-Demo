@@ -1,5 +1,12 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import {
+  Image,
+  LogBox,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import {fs, hp, wp} from '../helper/global';
 import {useNavigation} from '@react-navigation/native';
 import {Images} from '../helper/images';
@@ -10,7 +17,12 @@ const Header_navigation = ({title}) => {
   const [visible, setvisible] = useState(false);
   const [notification_visible, setnotification_visible] = useState(false);
   const [notification, setnotification] = useState(false);
+  // const [titles, settitle] = useState(title);
   const navigation = useNavigation();
+
+  // useEffect(() => {
+  //   settitle(title);
+  // }, []);
   return (
     <View style={styles?.header_container}>
       <TouchableOpacity
