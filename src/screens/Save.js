@@ -47,45 +47,37 @@ const Save = () => {
 
   const get_User_Data = async () => {
     let array = [];
-    let datas = [];
+    const datas = [];
     try {
       setvisible(true);
       setRefreshing(true);
+
       firestore()
         ?.collection('users')
+        ?.doc(auth()?.currentUser?.uid)
         ?.onSnapshot(async querySnapshot => {
-          querySnapshot?.docs.length == 0
-            ? (setvisible(false), setRefreshing(false))
-            : querySnapshot?.forEach(documentSnapshot => {
-                array = [];
-                datas = [];
-                if (documentSnapshot?.id == auth()?.currentUser?.uid) {
-                  firestore()
-                    .collection('post')
-                    .onSnapshot(onSnapshotData => {
-                      onSnapshotData.docs.map(i => {
-                        array.push(...i.data().postList);
-                      });
-                      setvisible(false);
-                      setRefreshing(false);
-                      array?.map(i =>
-                        documentSnapshot
-                          ?.data()
-                          ?.savedPost?.some(e =>
-                            e === i?.id ? datas?.push(i) : null,
-                          ),
-                      ),
-                        setdata(datas);
-                    });
-                  console.log(data);
-                }
+          // datas = [];
+          await querySnapshot?.data()?.savedPost?.map(item => {
+            firestore()
+              ?.collection('post')
+              ?.doc(item?.uid)
+              ?.onSnapshot(async res => {
+                await res?.data()?.postList?.map(async i => {
+                  if (i?.id === item?.id) {
+                    datas.push(i);
+                  }
+                });
               });
-        });
+          });
+        }),
+        setvisible(false);
+      setRefreshing(false);
     } catch (error) {
       setvisible(false);
       setRefreshing(false);
       console.log('Error', error);
     }
+    console.log('data-----', datas, datas.length);
   };
 
   const user_data = async () => {
@@ -98,7 +90,6 @@ const Save = () => {
           }
         });
       });
-
     get_User_Data();
   };
 
@@ -224,7 +215,7 @@ const Save = () => {
       ) : (
         <FlatList
           data={data}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item?.id}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={get_User_Data} />
@@ -259,6 +250,7 @@ const Save = () => {
                   style={{width}}
                   ref={current_index}
                   index={0}
+                  keyExtractor={item => item?.id}
                   onChangeIndex={() =>
                     setcurrentIndex(
                       current_index?.current?.getCurrentIndex() + 1,
@@ -301,13 +293,13 @@ const Save = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={async () => {
-                        userdata.savedPost.some(i => i == item.id)
+                        userdata.savedPost.some(i => i?.id == item.id)
                           ? un_save_post_handler(item)
                           : save_post_handler(item);
                       }}>
                       <Image
                         source={
-                          userdata.savedPost.some(i => i == item.id)
+                          userdata.savedPost.some(i => i?.id == item.id)
                             ? Images.savefill
                             : Images.save
                         }

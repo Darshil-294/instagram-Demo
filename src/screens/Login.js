@@ -90,6 +90,7 @@ const Login = ({navigation}) => {
         user = firebase.auth().currentUser.uid;
         console.log('uid', user);
         getData = await firestore()?.collection('users')?.doc(user)?.get();
+        console.log(getData);
         getData?.data()?.uid == user
           ? (DISPATCH(Current_User_Action(getData?.data())), console.log('ok'))
           : null;

@@ -137,6 +137,7 @@ const Home = () => {
                 <SwiperFlatList
                   style={{width}}
                   ref={current_index}
+                  keyExtractor={item => item?.id}
                   index={0}
                   onChangeIndex={() =>
                     setcurrentIndex(
@@ -180,13 +181,13 @@ const Home = () => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={async () => {
-                        userdata?.savedPost?.some(i => i == item?.id)
+                        userdata?.savedPost?.some(i => i.id == item?.id)
                           ? un_save_post_handler(item)
                           : save_post_handler(item);
                       }}>
                       <Image
                         source={
-                          userdata?.savedPost?.some(i => i == item?.id)
+                          userdata?.savedPost?.some(i => i.id == item?.id)
                             ? Images.savefill
                             : Images.save
                         }

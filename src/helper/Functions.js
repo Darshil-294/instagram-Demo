@@ -6,7 +6,10 @@ export const save_post_handler = async value => {
     ?.collection('users')
     .doc(auth()?.currentUser?.uid)
     .update({
-      savedPost: firebase.firestore.FieldValue.arrayUnion(value?.id),
+      savedPost: firebase.firestore.FieldValue.arrayUnion({
+        id: value?.id,
+        uid: value?.uid,
+      }),
     });
 };
 
@@ -15,7 +18,10 @@ export const un_save_post_handler = async value => {
     ?.collection('users')
     .doc(auth()?.currentUser?.uid)
     .update({
-      savedPost: firebase.firestore.FieldValue.arrayRemove(value?.id),
+      savedPost: firebase.firestore.FieldValue.arrayRemove({
+        id: value?.id,
+        uid: value?.uid,
+      }),
     });
 };
 
