@@ -15,7 +15,7 @@ import firestore, {firebase} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Modals from '../components/common/Modals';
 import {fs, hp, wp} from '../helper/global';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {colors} from '../helper/colors';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import {Images} from '../helper/images';
@@ -28,58 +28,77 @@ import {
   un_like_handler,
   un_save_post_handler,
 } from '../helper/Functions';
+import {Save_Post} from '../redux/Actions/Actions';
+import {useIsFocused} from '@react-navigation/native';
 
 const Save = () => {
   const [data, setdata] = useState([]);
-  const [userdata, setUserdata] = useState({});
+  const [userdata, setUserdata] = useState([]);
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
+  const [getData, setgetData] = useState(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    user_data();
-    // get_Data();
-  }, []);
+    if (isFocused) {
+      user_data();
+    }
+  }, [getData, isFocused]);
 
   const current_index = useRef(null);
-
   const user = useSelector(state => state?.user?.currentuser);
 
   const get_User_Data = async () => {
-    let array = [];
     const datas = [];
     try {
       setvisible(true);
       setRefreshing(true);
-
       firestore()
         ?.collection('users')
         ?.doc(auth()?.currentUser?.uid)
         ?.onSnapshot(async querySnapshot => {
-          // datas = [];
-          await querySnapshot?.data()?.savedPost?.map(item => {
-            firestore()
-              ?.collection('post')
-              ?.doc(item?.uid)
-              ?.onSnapshot(async res => {
-                await res?.data()?.postList?.map(async i => {
-                  if (i?.id === item?.id) {
-                    datas.push(i);
-                  }
+          let result = await querySnapshot
+            ?.data()
+            ?.savedPost?.map(async response => {
+              let ress = await firestore()
+                ?.collection('post')
+                ?.doc(response?.uid)
+                ?.get()
+                ?.then(async res => {
+                  return await res
+                    ?.data()
+                    ?.postList?.filter(item => item?.id == response?.id);
                 });
-              });
+              return ress;
+            });
+          await Promise.all(result).then(res => {
+            setdata(res?.flat());
           });
-        }),
-        setvisible(false);
+        });
+      setvisible(false);
       setRefreshing(false);
     } catch (error) {
       setvisible(false);
       setRefreshing(false);
       console.log('Error', error);
     }
-    console.log('data-----', datas, datas.length);
   };
 
+  // let result = await querySnapshot
+  //   ?.data()
+  //   ?.savedPost?.map(async response => {
+  //     let ress = await firestore()
+  //       ?.collection('post')
+  //       ?.doc(response?.uid)
+  //       ?.get()
+  //       ?.then(async res => {
+  //         return await res
+  //           ?.data()
+  //           ?.postList?.filter(item => item?.id == response?.id);
+  //       });
+  //     return ress;
+  //   });
   const user_data = async () => {
     firestore()
       ?.collection('users')
@@ -230,9 +249,7 @@ const Save = () => {
                       style={styles?.profile_img}
                     />
                     <View>
-                      <Text style={styles?.account_name}>
-                        {user?.firstname} {user?.lastname}
-                      </Text>
+                      <Text style={styles?.account_name}>{item?.fullName}</Text>
                       <Text style={styles?.title}>{item?.title}</Text>
                     </View>
                   </View>
@@ -274,8 +291,8 @@ const Save = () => {
                         item?.user_likes?.some(
                           val => val === auth()?.currentUser?.uid,
                         )
-                          ? un_like_handler(item)
-                          : like_handler(item);
+                          ? (un_like_handler(item), setgetData(!getData))
+                          : (like_handler(item), setgetData(!getData));
                       }}>
                       <Image
                         source={
@@ -309,9 +326,7 @@ const Save = () => {
                   </View>
                 </View>
                 <View style={styles?.discription_container}>
-                  <Text style={styles?.username}>
-                    {user?.firstname} {user?.lastname}
-                  </Text>
+                  <Text style={styles?.username}>{item?.fullName}</Text>
                   <Text style={styles?.description}>{item?.description}</Text>
                 </View>
                 <View style={styles?.like_section}>
@@ -320,9 +335,6 @@ const Save = () => {
                       <Text style={styles?.like_title}>{strings?.like} by</Text>
                       <Text style={{color: Colors?.black}}>
                         {item?.user_likes?.length}
-                        {item?.user_likes?.length == 1 ? null : (
-                          <Text> {item?.user_likes?.length - 1} Other</Text>
-                        )}
                       </Text>
                     </View>
                   )}

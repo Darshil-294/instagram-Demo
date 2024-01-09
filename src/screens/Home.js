@@ -29,6 +29,7 @@ import {
 } from '../helper/Functions';
 import firestore, {firebase} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import {Save_Post} from '../redux/Actions/Actions';
 
 const Home = () => {
   const [data, setdata] = useState([]);
@@ -162,8 +163,8 @@ const Home = () => {
                         item?.user_likes?.some(
                           val => val === auth()?.currentUser?.uid,
                         )
-                          ? un_like_handler(item)
-                          : like_handler(item);
+                          ? (un_like_handler(item), DISPATCH(Save_Post(item)))
+                          : (like_handler(item), DISPATCH(Save_Post(item)));
                       }}>
                       <Image
                         source={

@@ -1,5 +1,7 @@
 import firestore, {firebase} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import {useDispatch} from 'react-redux';
+import {Save_Post} from '../redux/Actions/Actions';
 
 export const save_post_handler = async value => {
   await firestore()

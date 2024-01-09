@@ -4,6 +4,7 @@ import {
   GET_MULTI_USER,
   HOME_POST,
   ROUTE_NAME,
+  SAVE_POST,
 } from '../Type';
 
 const INITIAL_STATE = {
@@ -12,6 +13,7 @@ const INITIAL_STATE = {
   route_name: false,
   home_post: [],
   get_multi_user: [],
+  save_post: [],
 };
 
 export const Reducers = (state = INITIAL_STATE, action) => {
@@ -30,6 +32,9 @@ export const Reducers = (state = INITIAL_STATE, action) => {
     }
     case GET_MULTI_USER: {
       return {...state, get_multi_user: action?.payload};
+    }
+    case SAVE_POST: {
+      return {...state, save_post: action?.payload};
     }
     default:
       return state;

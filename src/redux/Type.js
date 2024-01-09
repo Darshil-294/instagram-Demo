@@ -3,3 +3,4 @@ export const CURRENT_USER = 'CURRENT_USER';
 export const ROUTE_NAME = 'ROUTE_NAME';
 export const HOME_POST = 'HOME_POST';
 export const GET_MULTI_USER = 'GET_MULTI_USER';
+export const SAVE_POST = 'SAVE_POST';

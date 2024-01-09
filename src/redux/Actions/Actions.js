@@ -4,6 +4,7 @@ import {
   GET_MULTI_USER,
   HOME_POST,
   ROUTE_NAME,
+  SAVE_POST,
 } from '../Type';
 
 export const Add_Data_Action = data => dispatch => {
@@ -37,6 +38,14 @@ export const Home_Action = data => dispatch => {
 export const Get_multi_user_Action = data => dispatch => {
   dispatch({
     type: GET_MULTI_USER,
+    payload: data,
+  });
+};
+
+export const Save_Post = data => dispatch => {
+  console.log('datatatatatatatatatatat', data);
+  dispatch({
+    type: SAVE_POST,
     payload: data,
   });
 };
