@@ -2,6 +2,7 @@ import {
   Dimensions,
   FlatList,
   Image,
+  LogBox,
   Modal,
   Platform,
   RefreshControl,
@@ -37,18 +38,13 @@ const Home = () => {
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
+  const [like, setlike] = useState(false);
 
   useEffect(() => {
     user_data();
-    // App();
   }, []);
-
   const current_index = useRef(null);
   const DISPATCH = useDispatch();
-
-  const user = useSelector(state => state?.user?.currentuser);
-  const home_post = useSelector(state => state?.user?.home_post);
-  const get_main_Data = useSelector(state => state?.user?.get_multi_user);
 
   const user_data = async () => {
     firestore()
@@ -60,37 +56,53 @@ const Home = () => {
           }
         });
       });
-
     get_User_Post();
   };
+
+  // const get_User_Post = async () => {
+  //   let datass = [];
+  //   setvisible(true);
+  //   setRefreshing(true);
+  //   firestore()
+  //     ?.collection('users')
+  //     ?.onSnapshot(res => {
+  //       res?.docs?.map(async item => {
+  //         await item?.data()?.following?.map(async i => {
+  //           datass = [];
+  //           firestore()
+  //             ?.collection('post')
+  //             ?.onSnapshot(res => {
+  //               res?.docs?.map(datas => {
+  //                 if (datas?.id === i) {
+  //                   datass?.push(datas?.data()?.postList);
+  //                 }
+  //               });
+  //             });
+  //         });
+  //       });
+  //     });
+  //   setvisible(false);
+  //   setRefreshing(false);
+  // };
 
   const get_User_Post = async () => {
     setvisible(true);
     setRefreshing(true);
-    let data = [];
     firestore()
       ?.collection('users')
-      ?.onSnapshot(res => {
-        res?.docs?.map(item => {
-          if (item?.id === auth()?.currentUser?.uid) {
-            item?.data()?.following?.map(async i => {
-              firestore()
-                ?.collection('post')
-                ?.onSnapshot(res => {
-                  data = [];
-                  res?.docs?.map(datas => {
-                    if (
-                      datas?.id === auth()?.currentUser?.uid ||
-                      datas?.id === i
-                    ) {
-                      data?.push(datas?.data()?.postList);
-                    }
-                  });
-                  setdata(data?.flat());
-                });
-            });
-          }
+      ?.onSnapshot(async res => {
+        let aa = res?.docs?.map(async item => {
+          let bb = await item?.data()?.following?.map(async i => {
+            firestore()
+              ?.collection('post')
+              ?.doc(i)
+              ?.get()
+              ?.then(async response => {
+                await response?.data()?.postList;
+              });
+          });
         });
+        console.log('result', aa);
       });
     setvisible(false);
     setRefreshing(false);
@@ -163,8 +175,8 @@ const Home = () => {
                         item?.user_likes?.some(
                           val => val === auth()?.currentUser?.uid,
                         )
-                          ? (un_like_handler(item), DISPATCH(Save_Post(item)))
-                          : (like_handler(item), DISPATCH(Save_Post(item)));
+                          ? (un_like_handler(item), setlike(!like))
+                          : (like_handler(item), setlike(!like));
                       }}>
                       <Image
                         source={

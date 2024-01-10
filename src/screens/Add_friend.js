@@ -122,8 +122,7 @@ const Add_friend = ({visible, close}) => {
                       onPress={() => {
                         item.request.some(e => e == auth()?.currentUser?.uid)
                           ? cancel_requst(item?.uid)
-                          : // : console.log(item?.uid);
-                          item?.followers.includes(auth()?.currentUser?.uid)
+                          : item?.followers.includes(auth()?.currentUser?.uid)
                           ? unfollow(item?.uid)
                           : send_requst(item?.uid);
                       }}>
