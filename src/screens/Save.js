@@ -49,8 +49,43 @@ const Save = () => {
   const current_index = useRef(null);
   const user = useSelector(state => state?.user?.currentuser);
 
+  // const get_User_Data = async () => {
+  //   const datas = [];
+  //   try {
+  //     setvisible(true);
+  //     setRefreshing(true);
+  //     firestore()
+  //       ?.collection('users')
+  //       ?.doc(auth()?.currentUser?.uid)
+  //       ?.onSnapshot(async querySnapshot => {
+  //         let result = await querySnapshot
+  //           ?.data()
+  //           ?.savedPost?.map(async response => {
+  //             let ress = await firestore()
+  //               ?.collection('post')
+  //               ?.doc(response?.uid)
+  //               ?.get()
+  //               ?.then(async res => {
+  //                 return await res
+  //                   ?.data()
+  //                   ?.postList?.filter(item => item?.id == response?.id);
+  //               });
+  //             return ress;
+  //           });
+  //         await Promise.all(result).then(res => {
+  //           setdata(res?.flat());
+  //         });
+  //       });
+  //     setvisible(false);
+  //     setRefreshing(false);
+  //   } catch (error) {
+  //     setvisible(false);
+  //     setRefreshing(false);
+  //     console.log('Error', error);
+  //   }
+  // };
+
   const get_User_Data = async () => {
-    const datas = [];
     try {
       setvisible(true);
       setRefreshing(true);
@@ -85,20 +120,6 @@ const Save = () => {
     }
   };
 
-  // let result = await querySnapshot
-  //   ?.data()
-  //   ?.savedPost?.map(async response => {
-  //     let ress = await firestore()
-  //       ?.collection('post')
-  //       ?.doc(response?.uid)
-  //       ?.get()
-  //       ?.then(async res => {
-  //         return await res
-  //           ?.data()
-  //           ?.postList?.filter(item => item?.id == response?.id);
-  //       });
-  //     return ress;
-  //   });
   const user_data = async () => {
     firestore()
       ?.collection('users')
@@ -110,6 +131,83 @@ const Save = () => {
         });
       });
     get_User_Data();
+  };
+
+  const save_post_handler = async value => {
+    await firestore()
+      ?.collection('users')
+      .doc(auth()?.currentUser?.uid)
+      .update({
+        savedPost: firebase.firestore.FieldValue.arrayUnion({
+          id: value?.id,
+          uid: value?.uid,
+        }),
+      });
+  };
+
+  const un_save_post_handler = async value => {
+    await firestore()
+      ?.collection('users')
+      .doc(auth()?.currentUser?.uid)
+      .update({
+        savedPost: firebase.firestore.FieldValue.arrayRemove({
+          id: value?.id,
+          uid: value?.uid,
+        }),
+      });
+  };
+
+  const like_handler = async value => {
+    try {
+      await firestore()
+        ?.collection('post')
+        .doc(value?.uid)
+        .get()
+        .then(async d => {
+          await firestore()
+            ?.collection('post')
+            .doc(value?.uid)
+            .update({
+              postList: d.data().postList.map(i => {
+                if (i.id == value.id) {
+                  i.user_likes = [...i.user_likes, auth().currentUser.uid];
+                  return i;
+                }
+                return i;
+              }),
+            });
+        });
+      setgetData(!getData);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const un_like_handler = async value => {
+    await firestore()
+      ?.collection('post')
+      .doc(value?.uid)
+      .get()
+      .then(async d => {
+        await firestore()
+          ?.collection('post')
+          .doc(value?.uid)
+          .update({
+            postList: d.data().postList.map(i => {
+              if (i.id == value.id) {
+                i.user_likes = i.user_likes.filter(
+                  a => a !== auth().currentUser.uid,
+                );
+                return i;
+              }
+              return i;
+            }),
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        setgetData(!getData);
+      });
   };
 
   return (
@@ -179,8 +277,8 @@ const Save = () => {
                         item?.user_likes?.some(
                           val => val === auth()?.currentUser?.uid,
                         )
-                          ? (un_like_handler(item), setgetData(!getData))
-                          : (like_handler(item), setgetData(!getData));
+                          ? un_like_handler(item)
+                          : like_handler(item);
                       }}>
                       <Image
                         source={

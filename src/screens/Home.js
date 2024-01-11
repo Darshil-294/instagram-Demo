@@ -22,31 +22,32 @@ import {Images} from '../helper/images';
 import {strings} from '../helper/string';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Header_navigation from '../navigation/Header_navigation';
-import {
-  like_handler,
-  save_post_handler,
-  un_like_handler,
-  un_save_post_handler,
-} from '../helper/Functions';
 import firestore, {firebase} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import {Save_Post} from '../redux/Actions/Actions';
+import {useIsFocused} from '@react-navigation/native';
 
 const Home = () => {
-  const [data, setdata] = useState([]);
+  const [data, setData] = useState([]);
   const [userdata, setUserdata] = useState([]);
   const [visible, setvisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setcurrentIndex] = useState(1);
   const [like, setlike] = useState(false);
+  const [userDataPro, setuserDataPro] = useState(null);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    user_data();
-  }, []);
+    if (isFocused) {
+      user_data();
+    }
+  }, [like, isFocused]);
   const current_index = useRef(null);
   const DISPATCH = useDispatch();
 
   const user_data = async () => {
+    setvisible(true);
+    setRefreshing(true);
     firestore()
       ?.collection('users')
       ?.onSnapshot(res => {
@@ -56,56 +57,105 @@ const Home = () => {
           }
         });
       });
+    setvisible(false);
+    setRefreshing(false);
     get_User_Post();
   };
 
-  // const get_User_Post = async () => {
-  //   let datass = [];
-  //   setvisible(true);
-  //   setRefreshing(true);
-  //   firestore()
-  //     ?.collection('users')
-  //     ?.onSnapshot(res => {
-  //       res?.docs?.map(async item => {
-  //         await item?.data()?.following?.map(async i => {
-  //           datass = [];
-  //           firestore()
-  //             ?.collection('post')
-  //             ?.onSnapshot(res => {
-  //               res?.docs?.map(datas => {
-  //                 if (datas?.id === i) {
-  //                   datass?.push(datas?.data()?.postList);
-  //                 }
-  //               });
-  //             });
-  //         });
-  //       });
-  //     });
-  //   setvisible(false);
-  //   setRefreshing(false);
-  // };
-
   const get_User_Post = async () => {
-    setvisible(true);
-    setRefreshing(true);
-    firestore()
+    let users = await firestore()
       ?.collection('users')
-      ?.onSnapshot(async res => {
-        let aa = res?.docs?.map(async item => {
-          let bb = await item?.data()?.following?.map(async i => {
-            firestore()
-              ?.collection('post')
-              ?.doc(i)
-              ?.get()
-              ?.then(async response => {
-                await response?.data()?.postList;
-              });
-          });
-        });
-        console.log('result', aa);
-      });
+      ?.doc(auth()?.currentUser?.uid)
+      ?.get();
+    let posts = await users?.data()?.following?.map(async e => {
+      return await firestore()
+        ?.collection('post')
+        ?.doc(e)
+        ?.get()
+        ?.then(res => res?.data()?.postList);
+    });
+    await Promise.all(posts)?.then(res => {
+      setData(res?.flat()?.sort((a, b) => b?.time - a?.time));
+    });
     setvisible(false);
     setRefreshing(false);
+  };
+
+  const like_handler = async value => {
+    try {
+      await firestore()
+        ?.collection('post')
+        .doc(value?.uid)
+        .get()
+        .then(async d => {
+          await firestore()
+            ?.collection('post')
+            .doc(value?.uid)
+            .update({
+              postList: d.data().postList.map(i => {
+                if (i.id == value.id) {
+                  i.user_likes = [...i.user_likes, auth().currentUser.uid];
+                  return i;
+                }
+                return i;
+              }),
+            });
+          setlike(!like);
+        });
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const un_like_handler = async value => {
+    await firestore()
+      ?.collection('post')
+      .doc(value?.uid)
+      .get()
+      .then(async d => {
+        await firestore()
+          ?.collection('post')
+          .doc(value?.uid)
+          .update({
+            postList: d.data().postList.map(i => {
+              if (i.id == value.id) {
+                i.user_likes = i.user_likes.filter(
+                  a => a !== auth().currentUser.uid,
+                );
+                return i;
+              }
+              return i;
+            }),
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        setlike(!like);
+      });
+  };
+
+  const save_post_handler = async value => {
+    await firestore()
+      ?.collection('users')
+      .doc(auth()?.currentUser?.uid)
+      .update({
+        savedPost: firebase.firestore.FieldValue.arrayUnion({
+          id: value?.id,
+          uid: value?.uid,
+        }),
+      });
+  };
+
+  const un_save_post_handler = async value => {
+    await firestore()
+      ?.collection('users')
+      .doc(auth()?.currentUser?.uid)
+      .update({
+        savedPost: firebase.firestore.FieldValue.arrayRemove({
+          id: value?.id,
+          uid: value?.uid,
+        }),
+      });
   };
 
   return (
@@ -118,6 +168,7 @@ const Home = () => {
       ) : (
         <FlatList
           data={data}
+          extraData={like}
           keyExtractor={item => item?.id}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -175,8 +226,8 @@ const Home = () => {
                         item?.user_likes?.some(
                           val => val === auth()?.currentUser?.uid,
                         )
-                          ? (un_like_handler(item), setlike(!like))
-                          : (like_handler(item), setlike(!like));
+                          ? un_like_handler(item)
+                          : like_handler(item);
                       }}>
                       <Image
                         source={

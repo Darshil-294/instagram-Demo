@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "start3000": "react-native start --port 3000"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",

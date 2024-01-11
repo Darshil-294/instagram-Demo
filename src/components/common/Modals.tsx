@@ -54,7 +54,9 @@ const Modals = ({
       visible={visible}
       transparent={transparent}
       animationType={animation}>
-      <View style={[styles.modal, containerStyle]}>
+      <TouchableOpacity
+        onPress={() => close(false)}
+        style={[styles.modal, containerStyle]}>
         {!contain ? (
           <View style={styles.indicator}>
             <ActivityIndicator size={'large'} color={'black'} />
@@ -68,7 +70,7 @@ const Modals = ({
             {contain}
           </View>
         )}
-      </View>
+      </TouchableOpacity>
     </Modal>
   );
 };

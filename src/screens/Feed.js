@@ -93,9 +93,7 @@ const Feed = ({navigation}) => {
             title: title,
             description: description,
             date: new Date().toLocaleDateString(),
-            time: new Date().toLocaleTimeString('en-IN', {
-              timeStyle: 'short',
-            }),
+            time: Date.now(),
             user_likes: [],
             profile_picture: profile_picture,
             fullName: full_name,

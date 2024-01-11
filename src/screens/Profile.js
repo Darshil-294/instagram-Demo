@@ -52,7 +52,7 @@ const Profile = ({navigation}) => {
 
   useEffect(() => {
     user_data();
-  }, []);
+  }, [visible]);
 
   useEffect(() => {
     user_post();
@@ -203,43 +203,34 @@ const Profile = ({navigation}) => {
   };
 
   const followers_data = async () => {
-    let Followers_data = [];
-    let following_data = [];
     await firestore()
       ?.collection('users')
       ?.doc(auth()?.currentUser?.uid)
       ?.get()
-      ?.then(res => {
+      ?.then(async res => {
         if (res?.data()?.followers) {
-          setfollowers([]);
-          Followers_data = [];
-          res?.data()?.followers.map(
-            async followers =>
-              await firestore()
-                ?.collection('users')
-                ?.doc(followers)
-                ?.get()
-                ?.then(res => {
-                  Followers_data.push(res?.data());
-                  // setfollowers(Followers_data);
-                }),
-          );
-          setfollowers(Followers_data);
+          let followers = await res?.data()?.followers.map(async followers => {
+            return await firestore()
+              ?.collection('users')
+              ?.doc(followers)
+              ?.get()
+              ?.then(ress => ress?.data());
+          });
+          let response = await Promise.all(followers).then(r => r?.flat());
+          setfollowers(response);
         }
         if (res?.data()?.following) {
-          following_data = [];
-          setfollowing([]);
-
-          res?.data()?.following.map(following =>
-            firestore()
-              ?.collection('users')
-              ?.doc(following)
-              ?.get()
-              ?.then(res => {
-                following_data.push(res?.data());
-                setfollowing(following_data);
-              }),
-          );
+          let following = await res?.data()?.following.map(async following => {
+            if (following !== auth()?.currentUser?.uid) {
+              return await firestore()
+                ?.collection('users')
+                ?.doc(following)
+                ?.get()
+                ?.then(res => res?.data());
+            }
+          });
+          let response = await Promise.all(following).then(r => r?.flat());
+          setfollowing(response?.filter(e => e !== undefined));
         }
       });
   };
@@ -274,7 +265,7 @@ const Profile = ({navigation}) => {
                 followers_data(), setfollowing_modal(true);
               }}>
               <Text style={styles?.counter_title}>
-                {data?.following?.length}
+                {data?.following?.length - 1}
               </Text>
               <Text style={styles?.counter_title}>Following</Text>
             </TouchableOpacity>
